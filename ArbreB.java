@@ -3,7 +3,7 @@ import java.util.*;
 
 public class ArbreB {
     // M >= 2
-    public static int M = 10; // le nombre de clé max dans un noueud
+    public static int M = 3; // le nombre de clé max dans un noueud
     public Noeud racine;
 
     private static final class Noeud {
@@ -174,27 +174,48 @@ public class ArbreB {
      * @param valeur la valeur associée a la clé
      */
     public void ajouter(String cle, String valeur) {
-        ajouterRec(racine, cle, valeur);
+        Paire split = ajouterRec(racine, cle, valeur);
+        if (split != null) {
+            Noeud newRoot = new Noeud(false);
+            newRoot.cles[0] = split.cle;
+            newRoot.enfants[0] = racine;
+            newRoot.enfants[1] = split.noeud;
+            newRoot.taille = 1;
+            racine = newRoot;
+        }
     }
 
     /**
      * Elle ajoute une association clé, valeur dans le sous-arbre dont la racine est
-     * 
-     * <p>
-     * On suppose aucune feuille n’est pleine
-     * </p>
+     * Elle applique des splits sur les feuilles et les noeuds internes quand cela
+     * est nécessaire
      * 
      * @param n      noeud racine du sous-arbre
      * @param cle    la clé a ajouter
      * @param valeur la valeur associée a la clé
      */
-    private void ajouterRec(Noeud n, String cle, String valeur) {
+    private Paire ajouterRec(Noeud n, String cle, String valeur) {
         if (n.estFeuille) {
             int pos = positionPour(n, cle);
             insererA(n, pos, cle, valeur, null);
+
+            if (n.taille > M) {
+                return splitFeuille(n, cle, valeur);
+            }
+            return null;
+
         } else {
             int i = positionPour(n, cle);
-            ajouterRec(n.enfants[i], cle, valeur);
+            Paire paire = ajouterRec(n.enfants[i], cle, valeur);
+
+            if (paire != null) {
+                insererA(n, i, paire.cle, null, paire.noeud);
+
+                if (n.taille > M) {
+                    return splitInterne(n, paire.cle, paire.noeud);
+                }
+            }
+            return null;
         }
 
     }
@@ -283,7 +304,7 @@ public class ArbreB {
         String c = (posMed == posAjout) ? cle : n.cles[posMed];
         Paire p = new Paire(c, droit);
 
-        return p;
+        return p; // envoie la clé mediane et le nouveau noeud droit
     }
 
     private Paire splitInterne(Noeud n, String cle, Noeud enfant) {
