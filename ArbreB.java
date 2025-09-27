@@ -1,9 +1,25 @@
+
+/**
+ * Dans ce fichier, vous devez implémenter un arbre B avec les fonctionnalités
+ * suivantes :
+ * - insertion d'une paire (clé, valeur)
+ * - recherche d'une valeur par sa clé
+ * - recherche de toutes les valeurs dans un intervalle de clés
+ * - affichage de l'arbre de façon lisible
+ * Le code doit être bien structuré, commenté et respecter les bonnes pratiques
+ * de programmation en Java.
+ * 
+ * @author Erkin Tunc BOYA
+ * @version 1.9
+ * @date 2025-09-27
+ */
+
 import java.io.*;
 import java.util.*;
 
 public class ArbreB {
     // M >= 2
-    public static int M = 2; // le nombre de clé max dans un noueud
+    public static int M = 3; // le nombre de clé max dans un noueud
     public Noeud racine;
 
     private static final class Noeud {
@@ -12,6 +28,9 @@ public class ArbreB {
         public final String[] valeurs;
         public final Noeud[] enfants;
         public int taille = 0;
+
+        public String minKey;
+        public String maxKey;
 
         public Noeud(boolean feuille) {
             this.estFeuille = feuille;
@@ -283,9 +302,12 @@ public class ArbreB {
             }
 
             insererA(n, pos, cle, valeur, null);
+            updateRange(n);
 
             if (n.taille >= M) {
-                return splitFeuille(n, cle, valeur);
+                Paire p = splitFeuille(n, cle, valeur);
+                updateRange(n);
+                return p;
             }
             return null;
 
@@ -295,9 +317,12 @@ public class ArbreB {
 
             if (paire != null) {
                 insererA(n, i, paire.cle, null, paire.noeud);
+                updateRange(n);
 
                 if (n.taille >= M) {
-                    return splitInterne(n, paire.cle, paire.noeud);
+                    Paire p = splitInterne(n, paire.cle, paire.noeud);
+                    updateRange(n);
+                    return p;
                 }
             }
             return null;
@@ -373,6 +398,10 @@ public class ArbreB {
         // Réduire la taille du noeud gauche
         n.taille = mid;
 
+        // Mettre à jour les minKey et maxKey
+        updateRange(n);
+        updateRange(droit);
+
         // La clé médiane est la première de la feuille droite
         return new Paire(droit.cles[0], droit);
     }
@@ -409,8 +438,80 @@ public class ArbreB {
         // réduction du noeud gauche : il ne garde que les clés avant la médiane
         n.taille = posMed;
 
+        // Mettre à jour les minKey et maxKey
+        updateRange(n);
+        updateRange(droit);
+
         // retourner la clé médiane et le noeud droit
         return new Paire(cleMediane, droit);
+    }
+
+    /**
+     * Elle retourne la liste des clés dans l’intervalle [borneMin, borneMax]
+     * (inclus).
+     * 
+     * @param borneMin la borne minimale
+     * @param borneMax la borne maximale
+     * @return la liste des clés dans l’intervalle [borneMin, borneMax] (inclus)
+     */
+    public List<String> rechercheIntervalle(String borneMin, String borneMax) {
+        List<String> result = new ArrayList<>();
+        rechercheIntervalleRec(racine, borneMin, borneMax, result);
+        return result;
+    }
+
+    /**
+     * Elle remplit la liste result avec les valeurs des clés dans l’intervalle
+     * [min, max] (inclus) dans le sous-arbre dont la racine est n.
+     * 
+     * <p>
+     * On fera une optimisation en évitant de parcourir des sous-arbres qui sont
+     * complètement en dehors de l’intervalle.
+     * </p>
+     * 
+     * @param n      le noeud racine du sous-arbre
+     * @param min    la borne minimale
+     * @param max    la borne maximale
+     * @param result la liste des résultats
+     */
+    private void rechercheIntervalleRec(Noeud n, String min, String max, List<String> result) {
+        // OPTIMISATION : prune subtrees completely outside [min, max]
+        if (n.minKey != null && n.maxKey != null) {
+            if (n.maxKey.compareTo(min) < 0 || n.minKey.compareTo(max) > 0) {
+                return; // Ce sous-arbre est complètement hors de l'intervalle
+            }
+        }
+
+        if (n.estFeuille) {
+            for (int i = 0; i < n.taille; i++) {
+                if (n.cles[i].compareTo(min) >= 0 && n.cles[i].compareTo(max) <= 0) {
+                    result.add(n.valeurs[i]);
+                }
+            }
+        } else {
+            for (int i = 0; i <= n.taille; i++) {
+                rechercheIntervalleRec(n.enfants[i], min, max, result);
+            }
+        }
+    }
+
+    /**
+     * Met à jour les attributs minKey et maxKey d'un noeud.
+     * 
+     * @param n le noeud à mettre à jour
+     */
+    private void updateRange(Noeud n) {
+        if (n.estFeuille) {
+            if (n.taille > 0) {
+                n.minKey = n.cles[0];
+                n.maxKey = n.cles[n.taille - 1];
+            }
+        } else {
+            if (n.taille > 0) {
+                n.minKey = n.enfants[0].minKey;
+                n.maxKey = n.enfants[n.taille].maxKey;
+            }
+        }
     }
 
     public String toString() {
@@ -426,6 +527,13 @@ public class ArbreB {
         prettyPrintRec(racine, "", true);
     }
 
+    /**
+     * Méthode récursive pour afficher l'arbre B.
+     * 
+     * @param n      le noeud courant
+     * @param prefix le préfixe pour l'indentation
+     * @param isTail indique si c'est le dernier enfant
+     */
     private void prettyPrintRec(Noeud n, String prefix, boolean isTail) {
         // Noeud veya feuille anahtarlarını yaz
         System.out.println(prefix + (isTail ? "└── " : "├── ") + formatKeys(n));
@@ -439,7 +547,12 @@ public class ArbreB {
         }
     }
 
-    // Yardımcı: anahtarları köşeli parantez içinde yazdır
+    /**
+     * Formatte les clés d'un noeud pour l'affichage.
+     * 
+     * @param n le noeud à formater
+     * @return une chaîne représentant les clés du noeud
+     */
     private String formatKeys(Noeud n) {
         StringBuilder sb = new StringBuilder();
         sb.append("[");
@@ -453,7 +566,7 @@ public class ArbreB {
     }
 
     public static void main(String[] args) throws Exception {
-        ArbreB arbre = testCommunes();
+        ArbreB arbre = testSimple();
         arbre.toString();
     }
 
@@ -521,6 +634,12 @@ public class ArbreB {
         System.out.println(a);
         a.prettyPrint();
 
+        // Interval Search Demo
+        System.out.println("--------------------");
+        System.out.println("Recherche intervalle [c, d] :");
+        List<String> intervalResults = a.rechercheIntervalle("c", "d");
+        System.out.println(intervalResults);
+
         return a;
     }
 
@@ -530,10 +649,14 @@ public class ArbreB {
      * Quand M augmante la hauteur de l'arbre diminue => les recherches sont plus
      * rapides (moins ms)
      * </p>
+     * <p>
+     * temp de recherche augmante avec M.
+     * <p>
+     * Le fichier communes.txt doit être dans le répertoire de travail
+     * </p>
      * 
-     * 
-     * @return
-     * @throws Exception
+     * @return l'arbre B construit
+     * @throws Exception si le fichier n'est pas trouvé
      */
     public static ArbreB testCommunes() throws Exception {
         ArbreB a = new ArbreB();
