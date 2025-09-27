@@ -377,38 +377,40 @@ public class ArbreB {
         return new Paire(droit.cles[0], droit);
     }
 
+    /**
+     * Elle applique un split sur un noeud interne plein au moment de l’ajout d’une
+     * clé et d’un enfant.
+     * 
+     * @param n      le noeud interne plein à splitter
+     * @param cle    la clé à insérer
+     * @param enfant l'enfant à insérer
+     * @return la paire (clé médiane, nouveau noeud droit)
+     */
     private Paire splitInterne(Noeud n, String cle, Noeud enfant) {
+        // position médiane dans le noeud avec un élément en plus
+        int total = n.taille;
+        int posMed = total / 2;
+
+        // la clé médiane est celle qui va remonter au parent
+        String cleMediane = n.cles[posMed];
+
+        // création du noeud droit
         Noeud droit = new Noeud(false);
 
-        // position mediane dans le noeud avec un élément en plus
-        int posMed = M / 2;
-        int posAjout = positionPour(n, cle);
+        // copie de la partie droite du noeud (clés et enfants après la médiane)
+        for (int i = posMed + 1; i < total; i++) {
+            droit.cles[i - (posMed + 1)] = n.cles[i];
+            droit.enfants[i - (posMed + 1)] = n.enfants[i];
+        }
+        // copier le dernier enfant
+        droit.enfants[total - (posMed + 1)] = n.enfants[total];
+        droit.taille = total - posMed - 1;
 
-        // copie de la partie droite du noeud
+        // réduction du noeud gauche : il ne garde que les clés avant la médiane
+        n.taille = posMed;
 
-        // si on insere à gauche de la position mediane,
-        // les elt droit commence à la position mediane ie decal = 0
-        int decal = (posAjout <= posMed) ? 0 : 1;
-        for (int i = 0; posMed + decal + i < n.taille; i++)
-            insererA(droit, i, n.cles[posMed + decal + i], null, n.enfants[posMed + decal + i + 1]);
-        // quand la clé mediane est la clé insérée, le premier enfant droit est l'enfant
-        // insérée
-        // sinon c'est l'enfant à droite de la clé médiane
-        if (posMed == posAjout)
-            droit.enfants[0] = enfant;
-        else
-            droit.enfants[0] = n.enfants[posMed + decal];
-
-        n.taille = M / 2;
-        if (posAjout > posMed)
-            insererA(droit, posAjout - posMed - 1, cle, null, enfant);
-        else if (posAjout < posMed)
-            insererA(n, posAjout, cle, null, enfant);
-
-        String c = (posMed == posAjout) ? cle : n.cles[posMed];
-        Paire p = new Paire(c, droit);
-
-        return p;
+        // retourner la clé médiane et le noeud droit
+        return new Paire(cleMediane, droit);
     }
 
     public String toString() {
