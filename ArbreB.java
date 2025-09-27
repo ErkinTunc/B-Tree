@@ -1,17 +1,28 @@
 
 /**
- * Dans ce fichier, vous devez implémenter un arbre B avec les fonctionnalités
- * suivantes :
- * - insertion d'une paire (clé, valeur)
- * - recherche d'une valeur par sa clé
- * - recherche de toutes les valeurs dans un intervalle de clés
- * - affichage de l'arbre de façon lisible
- * Le code doit être bien structuré, commenté et respecter les bonnes pratiques
- * de programmation en Java.
- * 
- * @author Erkin Tunc BOYA
- * @version 1.9
- * @date 2025-09-27
+ * TP1 - Arbre B (Base de données avancée)
+ *
+ * Implémentation en mémoire primaire d’un arbre B tel que vu en cours.
+ * Ce programme fournit les fonctionnalités principales suivantes :
+ *
+ *  - Insertion d’une paire (clé, valeur)
+ *  - Recherche d’une valeur par sa clé
+ *  - Recherche efficace des valeurs appartenant à un intervalle de clés
+ *  - Recherche de valeurs par préfixe de clé
+ *  - Affichage lisible de la structure de l’arbre
+ *
+ * La classe ArbreB repose sur une structure interne Noeud qui peut être soit un
+ * nœud interne, soit une feuille. Le paramètre M (M >= 2) représente le nombre
+ * maximum de clés qu’un nœud peut contenir.
+ *
+ * Ce travail s’appuie sur les consignes du TP1 (Base de données avancée) et
+ * reprend les étapes d’implémentation abordées dans le sujet :
+ * méthodes outils, ajout simple, splits (feuilles et nœuds internes),
+ * et extensions (recherche par intervalle et préfixe).
+ *
+ * Auteur   : Erkin Tunc BOYA
+ * Version  : 1.9.2
+ * Date     : 27/09/2025
  */
 
 import java.io.*;
