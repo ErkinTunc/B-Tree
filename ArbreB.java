@@ -3,7 +3,7 @@ import java.util.*;
 
 public class ArbreB {
     // M >= 2
-    public static int M = 3; // le nombre de clé max dans un noueud
+    public static int M = 2; // le nombre de clé max dans un noueud
     public Noeud racine;
 
     private static final class Noeud {
@@ -110,7 +110,7 @@ public class ArbreB {
         for (int i = 0; i < n.taille; i++) {
 
             int cmp = cle.compareTo(n.cles[i]); // cle - n.cles[i]
-            if (cmp <= 0)
+            if (cmp < 0)
                 return i; // on insère avant la clé i
         }
         return n.taille;
@@ -453,7 +453,7 @@ public class ArbreB {
     }
 
     public static void main(String[] args) throws Exception {
-        ArbreB arbre = testSimple();
+        ArbreB arbre = testCommunes();
         arbre.toString();
     }
 
@@ -524,6 +524,17 @@ public class ArbreB {
         return a;
     }
 
+    /**
+     * Elle construit un arbre B avec les communes de France
+     * <p>
+     * Quand M augmante la hauteur de l'arbre diminue => les recherches sont plus
+     * rapides (moins ms)
+     * </p>
+     * 
+     * 
+     * @return
+     * @throws Exception
+     */
     public static ArbreB testCommunes() throws Exception {
         ArbreB a = new ArbreB();
         File f = new File("communes.txt");
