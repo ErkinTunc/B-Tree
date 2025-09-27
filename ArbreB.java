@@ -514,6 +514,56 @@ public class ArbreB {
         }
     }
 
+    /**
+     * Recherche toutes les clés qui commencent par un préfixe donné.
+     * 
+     * @param prefix le préfixe à chercher
+     * @return une liste des valeurs associées aux clés qui commencent par ce
+     *         préfixe
+     */
+    public List<String> recherchePrefixe(String prefix) {
+        List<String> result = new ArrayList<>();
+        recherchePrefixeRec(racine, prefix, result);
+        return result;
+    }
+
+    /**
+     * Méthode récursive pour chercher les clés par préfixe dans un sous-arbre.
+     * On utilise minKey et maxKey pour ignorer les sous-arbres hors du préfixe.
+     *
+     * @param n      noeud courant
+     * @param prefix le préfixe à chercher
+     * @param result la liste des résultats
+     */
+    private void recherchePrefixeRec(Noeud n, String prefix, List<String> result) {
+        if (n == null)
+            return;
+
+        // Construction d'une borne max fictive pour comparer
+        String prefixMax = prefix + Character.MAX_VALUE;
+
+        // PRUNING: si tout le noeud est avant ou après le préfixe -> inutile de
+        // descendre
+        if (n.maxKey != null && n.maxKey.compareTo(prefix) < 0)
+            return; // tout est trop petit
+        if (n.minKey != null && n.minKey.compareTo(prefixMax) > 0)
+            return; // tout est trop grand
+
+        if (n.estFeuille) {
+            // Vérifier les clés de la feuille
+            for (int i = 0; i < n.taille; i++) {
+                if (n.cles[i].startsWith(prefix)) {
+                    result.add(n.cles[i] + " -> " + n.valeurs[i]);
+                }
+            }
+        } else {
+            // Descendre dans tous les enfants
+            for (int i = 0; i <= n.taille; i++) {
+                recherchePrefixeRec(n.enfants[i], prefix, result);
+            }
+        }
+    }
+
     public String toString() {
         StringBuffer b = new StringBuffer();
         b.append(this.racine);
@@ -566,7 +616,7 @@ public class ArbreB {
     }
 
     public static void main(String[] args) throws Exception {
-        ArbreB arbre = testSimple();
+        ArbreB arbre = testCommunes();
         arbre.toString();
     }
 
@@ -680,6 +730,10 @@ public class ArbreB {
         System.out.println(String.format("recherche pour 'Mars' %s", a.recherche("Mars")));
         long t2 = System.currentTimeMillis();
         System.out.println(String.format("temps de recherche %s ms", t2 - t1));
+
+        // Prefix Search Demo
+        System.out.println("--------------------");
+        System.out.println("Recherche prefixe 'ch' : " + a.recherchePrefixe("Ab"));
 
         return a;
     }
