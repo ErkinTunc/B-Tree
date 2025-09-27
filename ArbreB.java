@@ -110,10 +110,8 @@ public class ArbreB {
         for (int i = 0; i < n.taille; i++) {
 
             int cmp = cle.compareTo(n.cles[i]); // cle - n.cles[i]
-            if (cmp == 0)
-                return i; // la clé existe déjà
-            else if (cmp < 0)
-                return i; // la clé doit être insérée avant n.cles[i]
+            if (cmp <= 0)
+                return i; // on insère avant la clé i
         }
         return n.taille;
     }
@@ -263,6 +261,10 @@ public class ArbreB {
      * Elle applique des splits sur les feuilles et les noeuds internes quand cela
      * est nécessaire
      * 
+     * <p>
+     * si la clé est déjà dans l’arbre, on remplace la valeur associée à la clé
+     * </p>
+     * 
      * @param n      noeud racine du sous-arbre
      * @param cle    la clé a ajouter
      * @param valeur la valeur associée a la clé
@@ -272,6 +274,14 @@ public class ArbreB {
     private Paire ajouterRec(Noeud n, String cle, String valeur) {
         if (n.estFeuille) {
             int pos = positionPour(n, cle);
+
+            // Controle de DUPLICATE
+            if (pos < n.taille && n.cles[pos].equals(cle)) {
+                // si il est déjà dans l'arbre, on remplace la valeur
+                n.valeurs[pos] = valeur;
+                return null; // pas de split, on arrête là
+            }
+
             insererA(n, pos, cle, valeur, null);
 
             if (n.taille >= M) {
@@ -348,38 +358,23 @@ public class ArbreB {
      * @return la paire (clé médiane, nouvelle feuille droite)
      */
     private Paire splitFeuille(Noeud n, String cle, String valeur) {
+        int total = n.taille; // déjà M+1 après insertion
+        int mid = total / 2; // position médiane
+
         Noeud droit = new Noeud(true);
 
-        // position mediane dans le noeud avec un élément en plus
-        int posMed = M / 2;
-        int posAjout = positionPour(n, cle); // nouveau position de nouvel cle
+        // Copier la moitié droite dans 'droit'
+        for (int i = mid; i < total; i++) {
+            droit.cles[i - mid] = n.cles[i];
+            droit.valeurs[i - mid] = n.valeurs[i];
+        }
+        droit.taille = total - mid;
 
-        // copie de la partie droite du noeud
+        // Réduire la taille du noeud gauche
+        n.taille = mid;
 
-        // si on insere à gauche de la position mediane,
-        // les elt droit commence à la position mediane ie decal = 0
-        int decal = (posAjout <= posMed) ? 0 : 1;
-        for (int i = 0; posMed + decal + i < n.taille; i++)
-            insererA(droit, i, n.cles[posMed + decal + i], n.valeurs[posMed + decal + i],
-                    null);
-        // quand la clé mediane est la clé insérée, la valeur droite est la valeur
-        // insérée
-        // sinon c'est l'enfant à droite de la clé médiane
-        if (posMed == posAjout)
-            droit.valeurs[0] = valeur;
-        else
-            droit.valeurs[0] = n.valeurs[posMed + decal];
-
-        n.taille = M / 2;
-        if (posAjout > posMed)
-            insererA(droit, posAjout - posMed - 1, cle, valeur, null);
-        else if (posAjout < posMed)
-            insererA(n, posAjout, cle, valeur, null);
-
-        String c = (posMed == posAjout) ? cle : n.cles[posMed];
-        Paire p = new Paire(c, droit);
-
-        return p; // envoie la clé mediane et le nouveau noeud droit
+        // La clé médiane est la première de la feuille droite
+        return new Paire(droit.cles[0], droit);
     }
 
     private Paire splitInterne(Noeud n, String cle, Noeud enfant) {
@@ -422,6 +417,39 @@ public class ArbreB {
         return b.toString();
     }
 
+    /**
+     * Affiche l'arbre B de façon lisible et minimaliste avec des flèches.
+     */
+    public void prettyPrint() {
+        prettyPrintRec(racine, "", true);
+    }
+
+    private void prettyPrintRec(Noeud n, String prefix, boolean isTail) {
+        // Noeud veya feuille anahtarlarını yaz
+        System.out.println(prefix + (isTail ? "└── " : "├── ") + formatKeys(n));
+
+        // Çocukları varsa, recursive çağrı
+        if (!n.estFeuille) {
+            for (int i = 0; i <= n.taille; i++) {
+                boolean last = (i == n.taille);
+                prettyPrintRec(n.enfants[i], prefix + (isTail ? "    " : "│   "), last);
+            }
+        }
+    }
+
+    // Yardımcı: anahtarları köşeli parantez içinde yazdır
+    private String formatKeys(Noeud n) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for (int i = 0; i < n.taille; i++) {
+            sb.append(n.cles[i]);
+            if (i + 1 < n.taille)
+                sb.append(", ");
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
     public static void main(String[] args) throws Exception {
         ArbreB arbre = testSimple();
         arbre.toString();
@@ -430,32 +458,66 @@ public class ArbreB {
     public static ArbreB testSimple() {
         ArbreB a = new ArbreB();
 
+        System.out.println("cle <e> est ajoutee");
         a.ajouter("e", "eclat");
         System.out.println(a);
+        a.prettyPrint();
 
+        System.out.println("--------------------");
+
+        System.out.println("cle <a> est ajoutee");
         a.ajouter("a", "ajout");
         System.out.println(a);
+        a.prettyPrint();
 
+        System.out.println("--------------------");
+
+        System.out.println("cle <c> est ajoutee");
         a.ajouter("c", "coucou");
         System.out.println(a);
+        a.prettyPrint();
 
+        System.out.println("--------------------");
+
+        System.out.println("cle <b> est ajoutee");
         a.ajouter("b", "bouh");
         System.out.println(a);
+        a.prettyPrint();
 
+        System.out.println("--------------------");
+
+        System.out.println("cle <d> est ajoutee");
         a.ajouter("d", "doudou");
         System.out.println(a);
+        a.prettyPrint();
 
+        System.out.println("--------------------");
+
+        System.out.println("cle <f> est ajoutee");
         a.ajouter("h", "herbe");
         System.out.println(a);
+        a.prettyPrint();
 
+        System.out.println("--------------------");
+
+        System.out.println("cle <i> est ajoutee");
         a.ajouter("i", "iris");
         System.out.println(a);
+        a.prettyPrint();
 
+        System.out.println("--------------------");
+
+        System.out.println("cle <f> est ajoutee");
         a.ajouter("f", "flot");
         System.out.println(a);
+        a.prettyPrint();
 
+        System.out.println("--------------------");
+
+        System.out.println("cle <g> est ajoutee");
         a.ajouter("g", "girafe");
         System.out.println(a);
+        a.prettyPrint();
 
         return a;
     }
