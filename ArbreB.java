@@ -73,8 +73,8 @@ public class ArbreB {
     }
 
     /**
-     * Retourne l’indice auquel un clé devrait être insérer dans un noeud interne ou
-     * une feuille.
+     * Elle retourne l’indice auquel un clé devrait être insérer dans un noeud
+     * interne ou une feuille.
      * <p>
      * On renverra M dans le cas, on devrait insérer dans un noeud plein après la
      * dernière clé
@@ -83,9 +83,26 @@ public class ArbreB {
      * @param n   la noeud dans lequel on veurt insérer la clé
      * @param cle le valeur de la clé à insérer
      * @return l'indice où insérer la clé dans la noeud
+     * 
+     * @throws NullPointerException     si noeud ou clé est null
+     * @throws IllegalArgumentException si noeud ou clé est null, ou si taille est
+     *                                  incohérente
      */
     private int positionPour(Noeud n, String cle) {
 
+        // Error handling
+        if (n == null) {
+            throw new NullPointerException("Erreur: le noeud est null.");
+        }
+        if (cle == null) {
+            throw new NullPointerException("Erreur: la clé est null.");
+        }
+        if (n.taille < 0 || n.taille > M) {
+            throw new IllegalArgumentException(
+                    "Erreur: taille du noeud invalide (" + n.taille + "), M=" + M);
+        }
+
+        // Main logic
         if (n.taille == M) {
             return M; // le noeud est plein, on insère après la dernière clé
         }
@@ -112,8 +129,27 @@ public class ArbreB {
      * 
      * @param n   le noeud dans lequel on décale les clés
      * @param pos la position à libérer
+     * 
+     * @throws NullPointerException     si noeud est null
+     * @throws IllegalArgumentException si la position est invalide ou si le noeud
+     *                                  est plein
      */
     private void decalerDeUn(Noeud n, int pos) {
+
+        // Error handling
+        if (n == null) {
+            throw new NullPointerException("Erreur: le noeud est null.");
+        }
+        if (pos < 0 || pos > n.taille) {
+            throw new IllegalArgumentException(
+                    "Erreur: position " + pos + " invalide pour un noeud de taille " + n.taille);
+        }
+        if (n.taille >= M) {
+            throw new IllegalArgumentException(
+                    "Erreur: impossible de décaler, le noeud est déjà plein (taille=" + n.taille + ", M=" + M + ")");
+        }
+
+        // Main logic
         if (n.taille == M) {
             System.err.println("Noeud est plein");
         }
@@ -146,9 +182,39 @@ public class ArbreB {
      * @param cle    la clé à insérer
      * @param valeur la valeur à insérer (null si n n'est pas une feuille)
      * @param enfant l'enfant à insérer (null si n est une feuille)
+     * 
+     * @throws NullPointerException     si noeud ou clé est null
+     * @throws IllegalArgumentException si la position est invalide ou si le noeud
+     *                                  est plein, ou si valeur/enfant est null
+     *                                  dans un contexte inapproprié
      */
     private void insererA(Noeud n, int pos, String cle, String valeur, Noeud enfant) {
 
+        // Error handling
+        if (n == null) {
+            throw new NullPointerException("Erreur: noeud est null.");
+        }
+        if (cle == null) {
+            throw new NullPointerException("Erreur: clé est null.");
+        }
+        if (pos < 0 || pos > n.taille) {
+            throw new IllegalArgumentException(
+                    "Erreur: position " + pos + " invalide pour un noeud de taille " + n.taille);
+        }
+        if (n.taille >= M) {
+            throw new IllegalArgumentException(
+                    "Erreur: le noeud est déjà plein (taille=" + n.taille + ", M=" + M + ")");
+        }
+
+        // Vérification cohérence feuille/interne
+        if (n.estFeuille && valeur == null) {
+            throw new IllegalArgumentException("Erreur: valeur ne peut pas être null dans une feuille.");
+        }
+        if (!n.estFeuille && enfant == null) {
+            throw new IllegalArgumentException("Erreur: enfant ne peut pas être null dans un noeud interne.");
+        }
+
+        // Main logic
         decalerDeUn(n, pos);
         n.cles[pos] = cle;
 
@@ -161,21 +227,28 @@ public class ArbreB {
     }
 
     /**
-     * Elle fait appel à une nouvelle
-     * méthode auxiliaire récursive ajouterRec(Noeud n, String cle, String valeur).
+     * Elle ajoute une association clé, valeur dans un arbre. Elle applique des
+     * splits sur les feuilles et les noeuds internes quand cela est nécessaire.
      * 
      * <p>
-     * Cette première version doit permettent d’ajouter une association clé, valeur
-     * dans un arbre B dont aucune feuille n’est pleine (aucun split ne peut
-     * survenir).(mettre M=10 pour tester)
+     * Elle fait appel à une nouvelle
+     * méthode auxiliaire récursive ajouterRec(Noeud n, String cle, String valeur).
      * </p>
      * 
      * @param cle    la clé a ajouter
      * @param valeur la valeur associée a la clé
+     * 
+     * @throws IllegalArgumentException si clé ou valeur est null
      */
     public void ajouter(String cle, String valeur) {
-        Paire split = ajouterRec(racine, cle, valeur);
-        if (split != null) {
+        // Error handling
+        if (cle == null || valeur == null) {
+            throw new NullPointerException("Erreur: clé ou valeur ne doivent pas être null.");
+        }
+
+        // Main logics
+        Paire split = ajouterRec(racine, cle, valeur); // si noeud est plein, on split
+        if (split != null) { // la racine a été splittée
             Noeud newRoot = new Noeud(false);
             newRoot.cles[0] = split.cle;
             newRoot.enfants[0] = racine;
@@ -193,13 +266,15 @@ public class ArbreB {
      * @param n      noeud racine du sous-arbre
      * @param cle    la clé a ajouter
      * @param valeur la valeur associée a la clé
+     * @return une paire (clé médiane, nouveau noeud droit) si un split a eu lieu
+     *         null sinon
      */
     private Paire ajouterRec(Noeud n, String cle, String valeur) {
         if (n.estFeuille) {
             int pos = positionPour(n, cle);
             insererA(n, pos, cle, valeur, null);
 
-            if (n.taille > M) {
+            if (n.taille >= M) {
                 return splitFeuille(n, cle, valeur);
             }
             return null;
@@ -211,7 +286,7 @@ public class ArbreB {
             if (paire != null) {
                 insererA(n, i, paire.cle, null, paire.noeud);
 
-                if (n.taille > M) {
+                if (n.taille >= M) {
                     return splitInterne(n, paire.cle, paire.noeud);
                 }
             }
