@@ -1,11 +1,11 @@
-# 🌳 B-Tree Implementation in Java
+# B-Tree Implementation in Java
 
 This project is part of the **Advanced Databases (Base de données avancée)** course.  
 It provides an **educational implementation of a B-Tree** in Java, focusing on the principles of balanced search trees and their role in database indexing.
 
 ---
 
-## 📌 Features
+## Features
 
 - Implementation of a **B-Tree** with configurable maximum number of keys (`M ≥ 2`).
 - Supports:
@@ -20,7 +20,7 @@ It provides an **educational implementation of a B-Tree** in Java, focusing on t
 
 ---
 
-## 📐 UML Overview
+## UML Overview
 
 ```mermaid
 classDiagram
@@ -50,7 +50,7 @@ classDiagram
 
 ---
 
-## 🛠️ Classes and Methods
+## Classes and Methods
 
 ### **`ArbreB`**
 
@@ -78,7 +78,7 @@ Represents both **internal nodes** and **leaf nodes**.
 
 ---
 
-## 🚀 Usage
+## Usage
 
 Compile and run:
 
@@ -102,7 +102,7 @@ System.out.println(btree.rechercheIntervalle("5", "15")); // → [val5, val7, va
 
 ---
 
-## 📚 Educational Context
+## Educational Context
 
 This project illustrates:
 
