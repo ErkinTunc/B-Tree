@@ -77,11 +77,11 @@ even for large datasets.
 
 Run one of the demo modes:
 
-    run.bat simple
+    .\run.bat simple
 
 or
 
-    run.bat communes
+    .\run.bat communes
 
 ---
 
@@ -99,7 +99,7 @@ or
 
 ### Simple Demo
 
-    run.bat simple
+    .\run.bat simple
 
 Demonstrates step-by-step insertion into the B-Tree with console
 visualization of node splits and tree structure evolution.
@@ -110,7 +110,7 @@ Also performs an interval search example.
 
 ### Dataset Demo
 
-    run.bat communes
+    .\run.bat communes
 
 Loads \~35k French municipalities and builds a B-Tree index.
 
