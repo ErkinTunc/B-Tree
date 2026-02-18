@@ -21,16 +21,12 @@
  * et extensions (recherche par intervalle et préfixe).
  *
  * Auteur   : Erkin Tunc BOYA
- * Version  : 1.9.2
+ * Version  : 2.0
  * Date     : 27/09/2025
  */
 
 package arbreb;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 import java.text.Normalizer;
@@ -590,33 +586,6 @@ public class ArbreB {
     }
 
     /**
-     * Affiche l'arbre B de façon lisible et minimaliste avec des flèches.
-     */
-    public void prettyPrint() {
-        prettyPrintRec(racine, "", true);
-    }
-
-    /**
-     * Méthode récursive pour afficher l'arbre B.
-     * 
-     * @param n      le noeud courant
-     * @param prefix le préfixe pour l'indentation
-     * @param isTail indique si c'est le dernier enfant
-     */
-    private void prettyPrintRec(Noeud n, String prefix, boolean isTail) {
-        // Noeud veya feuille anahtarlarını yaz
-        System.out.println(prefix + (isTail ? "└── " : "├── ") + formatKeys(n));
-
-        // Çocukları varsa, recursive çağrı
-        if (!n.estFeuille) {
-            for (int i = 0; i <= n.taille; i++) {
-                boolean last = (i == n.taille);
-                prettyPrintRec(n.enfants[i], prefix + (isTail ? "    " : "│   "), last);
-            }
-        }
-    }
-
-    /**
      * Formatte les clés d'un noeud pour l'affichage.
      * 
      * @param n le noeud à formater
@@ -634,84 +603,6 @@ public class ArbreB {
         return sb.toString();
     }
 
-    public static void main(String[] args) throws Exception {
-        ArbreB arbre = testCommunes();
-        arbre.toString();
-    }
-
-    public static ArbreB testSimple() {
-        ArbreB a = new ArbreB();
-
-        System.out.println("cle <e> est ajoutee");
-        a.ajouter("e", "eclat");
-        System.out.println(a);
-        a.prettyPrint();
-
-        System.out.println("--------------------");
-
-        System.out.println("cle <a> est ajoutee");
-        a.ajouter("a", "ajout");
-        System.out.println(a);
-        a.prettyPrint();
-
-        System.out.println("--------------------");
-
-        System.out.println("cle <c> est ajoutee");
-        a.ajouter("c", "coucou");
-        System.out.println(a);
-        a.prettyPrint();
-
-        System.out.println("--------------------");
-
-        System.out.println("cle <b> est ajoutee");
-        a.ajouter("b", "bouh");
-        System.out.println(a);
-        a.prettyPrint();
-
-        System.out.println("--------------------");
-
-        System.out.println("cle <d> est ajoutee");
-        a.ajouter("d", "doudou");
-        System.out.println(a);
-        a.prettyPrint();
-
-        System.out.println("--------------------");
-
-        System.out.println("cle <f> est ajoutee");
-        a.ajouter("h", "herbe");
-        System.out.println(a);
-        a.prettyPrint();
-
-        System.out.println("--------------------");
-
-        System.out.println("cle <i> est ajoutee");
-        a.ajouter("i", "iris");
-        System.out.println(a);
-        a.prettyPrint();
-
-        System.out.println("--------------------");
-
-        System.out.println("cle <f> est ajoutee");
-        a.ajouter("f", "flot");
-        System.out.println(a);
-        a.prettyPrint();
-
-        System.out.println("--------------------");
-
-        System.out.println("cle <g> est ajoutee");
-        a.ajouter("g", "girafe");
-        System.out.println(a);
-        a.prettyPrint();
-
-        // Interval Search Demo
-        System.out.println("--------------------");
-        System.out.println("Recherche intervalle [c, d] :");
-        List<String> intervalResults = a.rechercheIntervalle("c", "d");
-        System.out.println(intervalResults);
-
-        return a;
-    }
-
     /**
      * Normalise une chaîne en la convertissant en minuscules et en supprimant les
      * accents.
@@ -725,79 +616,28 @@ public class ArbreB {
                 .replaceAll("\\p{M}", ""); // remove accents
     }
 
+    // -------------------- Méthodes de test et d'affichage -------------------
+
     /**
-     * Elle construit un arbre B avec les communes de France
-     * <p>
-     * Quand M augmante la hauteur de l'arbre diminue => les recherches sont plus
-     * rapides (moins ms)
-     * </p>
-     * <p>
-     * temp de recherche augmante avec M.
-     * <p>
-     * Le fichier communes.txt doit être dans le répertoire de travail
-     * </p>
-     * 
-     * @return l'arbre B construit
-     * @throws Exception si le fichier n'est pas trouvé
+     * Prints the B-tree structure without exposing internal node representation.
      */
-    public static ArbreB testCommunes() throws Exception {
-        ArbreB a = new ArbreB();
-
-        Path path = Paths.get("data", "communes.txt");
-        Scanner sc = new Scanner(path.toFile());
-
-        if (!Files.exists(path)) {
-            throw new FileNotFoundException("Dataset not found: " + path);
-        }
-
-        int compteur = 0;
-        long t0 = System.currentTimeMillis();
-
-        while (sc.hasNext()) {
-            // on invente une addresse d'enregistrement pour chaque commune
-            a.ajouter(sc.nextLine(), String.format("F1.%s.%s", compteur / 1024, compteur % 1024));
-            compteur++;
-        }
-        sc.close();
-
-        long t1 = System.currentTimeMillis();
-
-        System.out.println();
-        System.out.println("=== B-Tree Index Report ===");
-        System.out.printf("Dataset: %s%n", path.toAbsolutePath().normalize());
-        System.out.printf("Records indexed: %d%n", compteur);
-        System.out.printf("Build time: %d ms%n", (t1 - t0));
-
-        long q0 = System.currentTimeMillis();
-        String chinon = a.recherche("Chinon");
-        String mars = a.recherche("Mars");
-        long q1 = System.currentTimeMillis();
-
-        System.out.printf("Lookup 'Chinon': %s%n", chinon);
-        System.out.printf("Lookup 'Mars'  : %s%n", mars);
-        System.out.printf("Lookup time (2 queries): %d ms%n", (q1 - q0));
-
-        System.out.println("---------------------------");
-
-        // Prefix Search Demo
-        System.out.println("--------------------");
-        String prefix = "ch";
-        int limit = 20;
-
-        List<String> results = a.recherchePrefixe(prefix);
-
-        System.out.printf("Prefix search '%s': %d matches (showing first %d)%n",
-                prefix, results.size(), Math.min(limit, results.size()));
-
-        for (int i = 0; i < Math.min(limit, results.size()); i++) {
-            System.out.printf("  %2d) %s%n", i + 1, results.get(i));
-        }
-
-        if (results.size() > limit) {
-            System.out.printf("  ... (%d more)%n", results.size() - limit);
-        }
-
-        return a;
+    public void prettyPrint() {
+        prettyPrintRec(this.racine, "", true);
     }
 
+    private void prettyPrintRec(Noeud n, String prefix, boolean isTail) {
+        if (n == null) {
+            System.out.println(prefix + (isTail ? "└── " : "├── ") + "null");
+            return;
+        }
+
+        System.out.println(prefix + (isTail ? "└── " : "├── ") + formatKeys(n));
+
+        if (!n.estFeuille) {
+            for (int i = 0; i <= n.taille; i++) {
+                boolean last = (i == n.taille);
+                prettyPrintRec(n.enfants[i], prefix + (isTail ? "    " : "│   "), last);
+            }
+        }
+    }
 }
