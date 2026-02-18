@@ -1,114 +1,141 @@
-# B-Tree Implementation in Java
+# B-TREE Indexing Engine in Java
 
-This project is part of the **Advanced Databases (Base de données avancée)** course.  
-It provides an **educational implementation of a B-Tree** in Java, focusing on the principles of balanced search trees and their role in database indexing.
+This project implements a **B-Tree based indexing engine** in Java as
+part of an Advanced Databases course. It has been extended beyond a
+course assignment to demonstrate practical database indexing and
+efficient data retrieval on large datasets.
+
+The system indexes municipality data and supports fast search operations
+using a balanced tree structure.
+
+---
+
+## Project Goals
+
+The project demonstrates:
+
+- Implementation of a B-Tree index structure
+- Efficient key-value storage and retrieval
+- Interval and prefix queries
+- Indexing of large datasets
+- Foundations of database indexing systems
+
+The objective is to simulate how databases use B-Tree structures for
+fast data access.
+
+---
+
+## Repository Structure
+
+    B-TREE/
+    │
+    ├── data/
+    │   └── communes.txt          # Dataset used for indexing
+    │
+    ├── docs/
+    │   └── tp1.pdf               # Original assignment description
+    │
+    ├── src/main/java/arbreb/
+    │   └── ArbreB.java           # B-tree implementation
+    │
+    ├── .gitignore
+    ├── LICENSE
+    ├── project_roadmap.md        # Development roadmap
+    └── README.md
 
 ---
 
 ## Features
 
-- Implementation of a **B-Tree** with configurable maximum number of keys (`M ≥ 2`).
-- Supports:
-  - **Insertion** of key–value pairs (`ajouter`, `ajouterRec`)
-  - **Lookup** of values by key (`recherche`)
-  - **Automatic node splitting** (`splitFeuille`, `splitInterne`)
-  - **Interval search** (values between two keys)
-  - **Prefix search** (all keys starting with a given prefix)
-- Includes **tests**:
-  - `testSimple` → step-by-step demonstration
-  - `testCommunes` → large dataset (French communes)
+Current implementation supports:
+
+- Key--value insertion
+- Search by key
+- Interval search
+- Prefix search
+- Automatic node splitting
+- Balanced tree maintenance
+
+The tree structure keeps search operations efficient even with large
+datasets.
 
 ---
 
-## UML Overview
-
-```mermaid
-classDiagram
-  class ArbreB {
-    - Noeud racine
-    - int M
-    + ajouter(String cle, String valeur)
-    - ajouterRec(Noeud n, String cle, String valeur) Paire
-    + recherche(String cle) String
-    + rechercheIntervalle(String min, String max) List~String~
-    + recherchePrefixe(String prefix) List~String~
-  }
-
-  class Noeud {
-    + boolean estFeuille
-    + int taille
-    + String[] cles
-    + String[] valeurs
-    + Noeud[] enfants
-    + String minKey
-    + String maxKey
-  }
-
-  ArbreB "1" *-- "1" Noeud : racine
-  Noeud "1" *-- "*" Noeud : enfants
-```
-
----
-
-## Classes and Methods
-
-### **`ArbreB`**
-
-Represents the **B-Tree**.
-
-- `ajouter(cle, valeur)` → Inserts a key–value pair into the tree.
-- `ajouterRec(Noeud n, cle, valeur)` → Recursive helper with split handling.
-- `recherche(cle)` → Returns the value associated with a key.
-- `rechercheIntervalle(min, max)` → Returns values with keys in `[min, max]`.
-- `recherchePrefixe(prefix)` → Returns values for keys starting with a prefix.
-- `splitFeuille(Noeud n, cle, valeur)` → Splits a full leaf node.
-- `splitInterne(Noeud n)` → Splits a full internal node.
-
-### **`Noeud`**
-
-Represents both **internal nodes** and **leaf nodes**.
-
-- Attributes:
-  - `estFeuille` → true if the node is a leaf.
-  - `cles[]` → keys stored in the node.
-  - `valeurs[]` → values (for leaves).
-  - `enfants[]` → child pointers (for internal nodes).
-  - `taille` → number of keys stored.
-  - `minKey`, `maxKey` → boundaries of the subtree (for pruning).
-
----
-
-## Usage
-
-Compile and run:
-
-```bash
-javac ArbreB.java
-java ArbreB
-```
-
-### Example
+## Example Usage
 
 ```java
-ArbreB btree = new ArbreB();
-btree.ajouter("5", "val5");
-btree.ajouter("10", "val10");
-btree.ajouter("20", "val20");
-btree.ajouter("7", "val7"); // triggers split
+ArbreB tree = new ArbreB();
 
-System.out.println(btree.recherche("10")); // → val10
-System.out.println(btree.rechercheIntervalle("5", "15")); // → [val5, val7, val10]
+tree.ajouter("5", "val5");
+tree.ajouter("10", "val10");
+tree.ajouter("20", "val20");
+tree.ajouter("7", "val7");
+
+System.out.println(tree.recherche("10"));
 ```
 
 ---
 
-## Educational Context
+## Running the Project
+
+Compile sources and generate `.class` files inside a build directory:
+
+```bash
+mkdir -p build
+javac -d build src/main/java/arbreb/*.java
+```
+
+Run the program:
+
+```bash
+java -cp build arbreb.ArbreB    
+```
+
+---
+
+## Dataset
+
+The project uses a dataset of French municipalities stored in:
+
+    data/communes.txt
+
+This dataset allows testing indexing performance on realistic data
+sizes.
+
+---
+
+## Future Improvements
+
+Planned upgrades:
+
+- Command-line query interface
+- Disk-based node storage
+- Performance benchmarking
+- Unit tests
+- Range query optimizations
+- Tree visualization
+
+---
+
+## Learning Outcomes
 
 This project illustrates:
 
-- How **B-Trees** maintain balance and efficiency.
-- How **splits** are propagated during insertion.
-- How databases implement **index structures** (B-Tree, B+Tree) for efficient lookups.
-- Extensions such as **interval search** and **prefix search**, as discussed in the TP instructions.
+- Balanced search tree behavior
+- Node splitting mechanics
+- Database indexing concepts
+- Efficient data retrieval techniques
 
 ---
+
+## CV Project Description Example
+
+> Implemented a B-tree based indexing engine in Java to efficiently
+> store and query large municipality datasets, supporting
+> logarithmic-time search and scalable data indexing.
+
+---
+
+## License
+
+This project is released under the MIT License.
