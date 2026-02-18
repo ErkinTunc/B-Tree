@@ -25,10 +25,15 @@
  * Date     : 27/09/2025
  */
 
-package main.java.arbreb;
+package arbreb;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
+
+import java.text.Normalizer;
 
 public class ArbreB {
     // M >= 2
@@ -528,51 +533,52 @@ public class ArbreB {
     }
 
     /**
-     * Recherche toutes les clés qui commencent par un préfixe donné.
-     * 
-     * @param prefix le préfixe à chercher
-     * @return une liste des valeurs associées aux clés qui commencent par ce
-     *         préfixe
+     * Recherche toutes les clés de l’arbre qui commencent par un préfixe donné.
+     *
+     * La recherche est insensible à la casse et aux accents : le préfixe est
+     * normalisé avant la recherche et comparé à des clés normalisées dans l’arbre.
+     *
+     * @param prefix préfixe recherché
+     * @return liste des valeurs associées aux clés correspondant au préfixe
      */
     public List<String> recherchePrefixe(String prefix) {
         List<String> result = new ArrayList<>();
-        recherchePrefixeRec(racine, prefix, result);
+        String normalizedPrefix = normalize(prefix);
+        recherchePrefixeRec(racine, normalizedPrefix, result);
         return result;
     }
 
     /**
-     * Méthode récursive pour chercher les clés par préfixe dans un sous-arbre.
-     * On utilise minKey et maxKey pour ignorer les sous-arbres hors du préfixe.
+     * Recherche récursivement toutes les clés d’un sous-arbre qui commencent
+     * par un préfixe donné.
      *
-     * @param n      noeud courant
-     * @param prefix le préfixe à chercher
-     * @param result la liste des résultats
+     * La recherche est insensible à la casse et aux accents : les clés et le
+     * préfixe sont normalisés avant la comparaison.
+     *
+     * Le mécanisme de pruning basé sur minKey/maxKey est volontairement désactivé,
+     * car les clés sont stockées dans leur forme originale alors que la comparaison
+     * se fait sur des chaînes normalisées. L’utiliser pourrait ignorer des
+     * résultats
+     * valides.
+     *
+     * @param n                noeud courant exploré
+     * @param normalizedPrefix préfixe normalisé utilisé pour la comparaison
+     * @param result           liste contenant les couples clé–valeur correspondants
      */
-    private void recherchePrefixeRec(Noeud n, String prefix, List<String> result) {
+    private void recherchePrefixeRec(Noeud n, String normalizedPrefix, List<String> result) {
         if (n == null)
             return;
 
-        // Construction d'une borne max fictive pour comparer
-        String prefixMax = prefix + Character.MAX_VALUE;
-
-        // PRUNING: si tout le noeud est avant ou après le préfixe -> inutile de
-        // descendre
-        if (n.maxKey != null && n.maxKey.compareTo(prefix) < 0)
-            return; // tout est trop petit
-        if (n.minKey != null && n.minKey.compareTo(prefixMax) > 0)
-            return; // tout est trop grand
-
         if (n.estFeuille) {
-            // Vérifier les clés de la feuille
             for (int i = 0; i < n.taille; i++) {
-                if (n.cles[i].startsWith(prefix)) {
+                String normalizedKey = normalize(n.cles[i]);
+                if (normalizedKey.startsWith(normalizedPrefix)) {
                     result.add(n.cles[i] + " -> " + n.valeurs[i]);
                 }
             }
         } else {
-            // Descendre dans tous les enfants
             for (int i = 0; i <= n.taille; i++) {
-                recherchePrefixeRec(n.enfants[i], prefix, result);
+                recherchePrefixeRec(n.enfants[i], normalizedPrefix, result);
             }
         }
     }
@@ -707,6 +713,19 @@ public class ArbreB {
     }
 
     /**
+     * Normalise une chaîne en la convertissant en minuscules et en supprimant les
+     * accents.
+     * 
+     * @param s la chaîne à normaliser
+     * @return la chaîne normalisée
+     */
+    static String normalize(String s) {
+        String lower = s.toLowerCase(java.util.Locale.ROOT);
+        return Normalizer.normalize(lower, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", ""); // remove accents
+    }
+
+    /**
      * Elle construit un arbre B avec les communes de France
      * <p>
      * Quand M augmante la hauteur de l'arbre diminue => les recherches sont plus
@@ -723,8 +742,14 @@ public class ArbreB {
      */
     public static ArbreB testCommunes() throws Exception {
         ArbreB a = new ArbreB();
-        File f = new File("communes.txt");
-        Scanner sc = new Scanner(f);
+
+        Path path = Paths.get("data", "communes.txt");
+        Scanner sc = new Scanner(path.toFile());
+
+        if (!Files.exists(path)) {
+            throw new FileNotFoundException("Dataset not found: " + path);
+        }
+
         int compteur = 0;
         long t0 = System.currentTimeMillis();
 
@@ -736,17 +761,41 @@ public class ArbreB {
         sc.close();
 
         long t1 = System.currentTimeMillis();
-        System.out.println(String.format("temps de construction %s ms", t1 - t0));
 
-        System.out.println(String.format("recherche pour 'Chinon' %s", a.recherche("Chinon")));
+        System.out.println();
+        System.out.println("=== B-Tree Index Report ===");
+        System.out.printf("Dataset: %s%n", path.toAbsolutePath().normalize());
+        System.out.printf("Records indexed: %d%n", compteur);
+        System.out.printf("Build time: %d ms%n", (t1 - t0));
 
-        System.out.println(String.format("recherche pour 'Mars' %s", a.recherche("Mars")));
-        long t2 = System.currentTimeMillis();
-        System.out.println(String.format("temps de recherche %s ms", t2 - t1));
+        long q0 = System.currentTimeMillis();
+        String chinon = a.recherche("Chinon");
+        String mars = a.recherche("Mars");
+        long q1 = System.currentTimeMillis();
+
+        System.out.printf("Lookup 'Chinon': %s%n", chinon);
+        System.out.printf("Lookup 'Mars'  : %s%n", mars);
+        System.out.printf("Lookup time (2 queries): %d ms%n", (q1 - q0));
+
+        System.out.println("---------------------------");
 
         // Prefix Search Demo
         System.out.println("--------------------");
-        System.out.println("Recherche prefixe 'ch' : " + a.recherchePrefixe("Ab"));
+        String prefix = "ch";
+        int limit = 20;
+
+        List<String> results = a.recherchePrefixe(prefix);
+
+        System.out.printf("Prefix search '%s': %d matches (showing first %d)%n",
+                prefix, results.size(), Math.min(limit, results.size()));
+
+        for (int i = 0; i < Math.min(limit, results.size()); i++) {
+            System.out.printf("  %2d) %s%n", i + 1, results.get(i));
+        }
+
+        if (results.size() > limit) {
+            System.out.printf("  ... (%d more)%n", results.size() - limit);
+        }
 
         return a;
     }
