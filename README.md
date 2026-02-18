@@ -104,7 +104,15 @@ or
 Demonstrates step-by-step insertion into the B-Tree with console
 visualization of node splits and tree structure evolution.
 
-Also performs an interval search example.
+Also performs an interval query demonstration.
+
+Example output:
+
+    B-Tree === Insert <e> ===
+    └── [e]
+    --------------------------------
+    B-Tree === Insert <a> ===
+    └── [a, e]
 
 ---
 
@@ -125,9 +133,10 @@ Example:
 
     === B-Tree Index Report ===
     Records indexed: 34980
-    Build time: 173 ms
-    Lookup time: ~0 ms
-    Prefix matches: 1282 results
+    Build time: 189 ms
+    Lookup 'Chinon': F1.32.365
+    Lookup 'Mars'  : F1.14.31
+    Lookup time (2 queries): 0 ms
 
 ---
 
