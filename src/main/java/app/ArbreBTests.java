@@ -20,75 +20,36 @@ public final class ArbreBTests {
     }
 
     public static ArbreB testSimple() {
-        ArbreB a = new ArbreB();
+        ArbreB tree = new ArbreB();
 
-        System.out.println("cle <e> est ajoutee");
-        a.ajouter("e", "eclat");
-        System.out.println(a);
-        a.prettyPrint();
+        insertAndPrint(tree, "e", "eclat");
+        insertAndPrint(tree, "a", "ajout");
+        insertAndPrint(tree, "c", "coucou");
+        insertAndPrint(tree, "b", "bouh");
+        insertAndPrint(tree, "d", "doudou");
+        insertAndPrint(tree, "h", "herbe");
+        insertAndPrint(tree, "i", "iris");
+        insertAndPrint(tree, "f", "flot");
+        insertAndPrint(tree, "g", "girafe");
 
-        System.out.println("--------------------");
-
-        System.out.println("cle <a> est ajoutee");
-        a.ajouter("a", "ajout");
-        System.out.println(a);
-        a.prettyPrint();
-
-        System.out.println("--------------------");
-
-        System.out.println("cle <c> est ajoutee");
-        a.ajouter("c", "coucou");
-        System.out.println(a);
-        a.prettyPrint();
-
-        System.out.println("--------------------");
-
-        System.out.println("cle <b> est ajoutee");
-        a.ajouter("b", "bouh");
-        System.out.println(a);
-        a.prettyPrint();
-
-        System.out.println("--------------------");
-
-        System.out.println("cle <d> est ajoutee");
-        a.ajouter("d", "doudou");
-        System.out.println(a);
-        a.prettyPrint();
-
-        System.out.println("--------------------");
-
-        System.out.println("cle <h> est ajoutee");
-        a.ajouter("h", "herbe");
-        System.out.println(a);
-        a.prettyPrint();
-
-        System.out.println("--------------------");
-
-        System.out.println("cle <i> est ajoutee");
-        a.ajouter("i", "iris");
-        System.out.println(a);
-        a.prettyPrint();
-
-        System.out.println("--------------------");
-
-        System.out.println("cle <f> est ajoutee");
-        a.ajouter("f", "flot");
-        System.out.println(a);
-        a.prettyPrint();
-
-        System.out.println("--------------------");
-
-        System.out.println("cle <g> est ajoutee");
-        a.ajouter("g", "girafe");
-        System.out.println(a);
-        a.prettyPrint();
-
-        System.out.println("--------------------");
-        System.out.println("Recherche intervalle [c, d] :");
-        List<String> intervalResults = a.rechercheIntervalle("c", "d");
+        System.out.println("\n=== Interval query: [c, d] ===");
+        List<String> intervalResults = tree.rechercheIntervalle("c", "d");
         System.out.println(intervalResults);
+        System.err.println("");
 
-        return a;
+        return tree;
+    }
+
+    private static void insertAndPrint(ArbreB tree, String key, String value) {
+        tree.ajouter(key, value);
+
+        System.out.println("\nB-Tree === Insert <" + key + "> ===");
+        tree.prettyPrint();
+
+        // If you want the verbose representation too, uncomment:
+        // System.out.println(tree);
+
+        System.out.println("--------------------------------");
     }
 
     /**
