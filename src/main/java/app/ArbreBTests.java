@@ -10,15 +10,27 @@ import java.util.Scanner;
 import arbreb.ArbreB;
 
 /**
- * Manual demo scenarios (tests) for understanding ArbreB.
- * Must use ONLY ArbreB public API.
+ * Contient des scénarios de démonstration et de test permettant
+ * d'observer le comportement de l'arbre B en utilisant uniquement
+ * son API publique.
  */
 public final class ArbreBTests {
 
+    /**
+     * Constructeur privé afin d'empêcher l'instanciation de cette
+     * classe utilitaire contenant uniquement des méthodes statiques.
+     */
     private ArbreBTests() {
         // Utility class
     }
 
+    /**
+     * Construit un petit arbre B via une série d'insertions et affiche
+     * l'évolution de la structure après chaque ajout. Un exemple de
+     * recherche par intervalle est ensuite exécuté.
+     *
+     * @return l'arbre B construit pour le scénario de test simple
+     */
     public static ArbreB testSimple() {
         ArbreB tree = new ArbreB();
 
@@ -40,6 +52,14 @@ public final class ArbreBTests {
         return tree;
     }
 
+    /**
+     * Insère une paire (clé, valeur) dans l'arbre B puis affiche
+     * la structure actuelle de l'arbre après l'insertion.
+     *
+     * @param tree  l'arbre B modifié
+     * @param key   la clé à insérer
+     * @param value la valeur associée à la clé
+     */
     private static void insertAndPrint(ArbreB tree, String key, String value) {
         tree.ajouter(key, value);
 
@@ -53,63 +73,81 @@ public final class ArbreBTests {
     }
 
     /**
-     * Builds a B-tree from data/communes.txt
+     * Charge le fichier data/communes.txt dans un arbre B,
+     * affiche des statistiques d'indexation puis exécute
+     * quelques recherches de démonstration.
+     *
+     * @return l'arbre B construit à partir du dataset
+     * @throws Exception si le fichier est introuvable ou illisible
      */
     public static ArbreB testCommunes() throws Exception {
-        ArbreB a = new ArbreB();
 
-        Path path = Paths.get("data", "communes.txt");
-        if (!Files.exists(path)) {
-            throw new FileNotFoundException("Dataset not found: " + path);
+        ArbreB tree = new ArbreB();
+
+        Path datasetPath = Paths.get("data", "communes.txt");
+        if (!Files.exists(datasetPath)) {
+            throw new FileNotFoundException("Dataset not found: " + datasetPath);
         }
 
-        Scanner sc = new Scanner(path.toFile());
+        int recordCount = 0;
+        long buildStart = System.currentTimeMillis();
 
-        int compteur = 0;
-        long t0 = System.currentTimeMillis();
-
-        while (sc.hasNext()) {
-            a.ajouter(sc.nextLine(), String.format("F1.%s.%s", compteur / 1024, compteur % 1024));
-            compteur++;
+        try (Scanner scanner = new Scanner(datasetPath.toFile())) {
+            while (scanner.hasNext()) {
+                tree.ajouter(
+                        scanner.nextLine(),
+                        String.format("F1.%s.%s",
+                                recordCount / 1024,
+                                recordCount % 1024));
+                recordCount++;
+            }
         }
-        sc.close();
 
-        long t1 = System.currentTimeMillis();
+        long buildEnd = System.currentTimeMillis();
 
+        /* ----- Build report ----- */
         System.out.println();
         System.out.println("=== B-Tree Index Report ===");
-        System.out.printf("Dataset: %s%n", path.toAbsolutePath().normalize());
-        System.out.printf("Records indexed: %d%n", compteur);
-        System.out.printf("Build time: %d ms%n", (t1 - t0));
+        System.out.printf("Dataset: %s%n", datasetPath.toAbsolutePath().normalize());
+        System.out.printf("Records indexed: %d%n", recordCount);
+        System.out.printf("Build time: %d ms%n", buildEnd - buildStart);
 
-        long q0 = System.currentTimeMillis();
-        String chinon = a.recherche("Chinon");
-        String mars = a.recherche("Mars");
-        long q1 = System.currentTimeMillis();
+        /* ----- Lookup demo ----- */
+        long lookupStart = System.currentTimeMillis();
+
+        String chinon = tree.recherche("Chinon");
+        String mars = tree.recherche("Mars");
+
+        long lookupEnd = System.currentTimeMillis();
 
         System.out.printf("Lookup 'Chinon': %s%n", chinon);
         System.out.printf("Lookup 'Mars'  : %s%n", mars);
-        System.out.printf("Lookup time (2 queries): %d ms%n", (q1 - q0));
+        System.out.printf("Lookup time (2 queries): %d ms%n",
+                lookupEnd - lookupStart);
 
+        /* ----- Prefix search demo ----- */
         System.out.println("---------------------------");
 
-        System.out.println("--------------------");
         String prefix = "ch";
-        int limit = 20;
+        int displayLimit = 20;
 
-        List<String> results = a.recherchePrefixe(prefix);
+        List<String> results = tree.recherchePrefixe(prefix);
 
-        System.out.printf("Prefix search '%s': %d matches (showing first %d)%n",
-                prefix, results.size(), Math.min(limit, results.size()));
+        System.out.printf(
+                "Prefix search '%s': %d matches (showing first %d)%n",
+                prefix,
+                results.size(),
+                Math.min(displayLimit, results.size()));
 
-        for (int i = 0; i < Math.min(limit, results.size()); i++) {
+        for (int i = 0; i < Math.min(displayLimit, results.size()); i++) {
             System.out.printf("  %2d) %s%n", i + 1, results.get(i));
         }
 
-        if (results.size() > limit) {
-            System.out.printf("  ... (%d more)%n", results.size() - limit);
+        if (results.size() > displayLimit) {
+            System.out.printf("  ... (%d more)%n",
+                    results.size() - displayLimit);
         }
 
-        return a;
+        return tree;
     }
 }

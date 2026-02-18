@@ -1,8 +1,8 @@
 package app;
 
 /**
- * Program entry-point.
- * Test/demo scenarios live in ArbreBTests to keep Main minimal.
+ * Program entry point.
+ * Lance les scénarios de démonstration pour l'arbre B.
  */
 public class Main {
 
