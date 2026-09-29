@@ -17,39 +17,32 @@ public class ArbreBRegressionTest {
 
         // Son eklenen değer bulunmalı.
         assertEquals(
-            "75000",
-            arbreb.recherche("Paris")
-        );
+                "75000",
+                arbreb.recherche("Paris"));
 
         // Aynı anahtar için tek mantıksal kayıt olmalı.
         assertEquals(
-            List.of("75000"),
-            arbreb.rechercheIntervalle("Paris", "Paris")
-        );
+                List.of("75000"),
+                arbreb.rechercheIntervalle("Paris", "Paris"));
     }
 
     @Test
     public void staleRangeMetadataTest() {
         ArbreB arbreb = new ArbreB();
 
-        // İlk leaf split'i tetikle.
         arbreb.ajouter("B", "2");
         arbreb.ajouter("C", "3");
         arbreb.ajouter("D", "4");
+        arbreb.ajouter("E", "5");
 
-        // Sol leaf'e yeni minimum anahtarı ekle.
+        // Parent metadata güncellendikten sonra,
+        // child split olmadan yeni minimum ekleniyor.
         arbreb.ajouter("A", "1");
 
-        // Exact search kaydı bulabilmeli.
-        assertEquals(
-            "1",
-            arbreb.recherche("A")
-        );
+        assertEquals("1", arbreb.recherche("A"));
 
-        // Interval search de aynı kaydı bulabilmeli.
         assertEquals(
-            List.of("1"),
-            arbreb.rechercheIntervalle("A", "A")
-        );
+                List.of("1"),
+                arbreb.rechercheIntervalle("A", "A"));
     }
 }
