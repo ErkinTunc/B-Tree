@@ -10,15 +10,14 @@ import java.util.Scanner;
 import arbreb.ArbreB;
 
 /**
- * Contient des scénarios de démonstration et de test permettant
- * d'observer le comportement de l'arbre B en utilisant uniquement
- * son API publique.
+ * Contient des scénarios de démonstration et de test permettant d'observer le
+ * comportement de l'arbre B en utilisant uniquement son API publique.
  */
 public final class ArbreBTests {
 
     /**
-     * Constructeur privé afin d'empêcher l'instanciation de cette
-     * classe utilitaire contenant uniquement des méthodes statiques.
+     * Constructeur privé afin d'empêcher l'instanciation de cette classe
+     * utilitaire contenant uniquement des méthodes statiques.
      */
     private ArbreBTests() {
         // Utility class
@@ -26,8 +25,8 @@ public final class ArbreBTests {
 
     /**
      * Construit un petit arbre B via une série d'insertions et affiche
-     * l'évolution de la structure après chaque ajout. Un exemple de
-     * recherche par intervalle est ensuite exécuté.
+     * l'évolution de la structure après chaque ajout. Un exemple de recherche
+     * par intervalle est ensuite exécuté.
      *
      * @return l'arbre B construit pour le scénario de test simple
      */
@@ -53,11 +52,11 @@ public final class ArbreBTests {
     }
 
     /**
-     * Insère une paire (clé, valeur) dans l'arbre B puis affiche
-     * la structure actuelle de l'arbre après l'insertion.
+     * Insère une paire (clé, valeur) dans l'arbre B puis affiche la structure
+     * actuelle de l'arbre après l'insertion.
      *
-     * @param tree  l'arbre B modifié
-     * @param key   la clé à insérer
+     * @param tree l'arbre B modifié
+     * @param key la clé à insérer
      * @param value la valeur associée à la clé
      */
     private static void insertAndPrint(ArbreB tree, String key, String value) {
@@ -68,14 +67,13 @@ public final class ArbreBTests {
 
         // If you want the verbose representation too, uncomment:
         // System.out.println(tree);
-
         System.out.println("--------------------------------");
     }
 
     /**
-     * Charge le fichier data/communes.txt dans un arbre B,
-     * affiche des statistiques d'indexation puis exécute
-     * quelques recherches de démonstration.
+     * Charge le fichier data/communes.txt dans un arbre B, affiche des
+     * statistiques d'indexation puis exécute quelques recherches de
+     * démonstration.
      *
      * @return l'arbre B construit à partir du dataset
      * @throws Exception si le fichier est introuvable ou illisible

@@ -1,19 +1,18 @@
-
 /**
  * TP1 - Arbre B (Base de données avancée)
  *
  * Implémentation en mémoire primaire d’un arbre B tel que vu en cours.
  * Ce programme fournit les fonctionnalités principales suivantes :
  *
- *  - Insertion d’une paire (clé, valeur)
+ *  - Insertion d’une SplitResult (clé, valeur)
  *  - Recherche d’une valeur par sa clé
  *  - Recherche efficace des valeurs appartenant à un intervalle de clés
  *  - Recherche de valeurs par préfixe de clé
  *  - Affichage lisible de la structure de l’arbre
  *
  * La classe ArbreB repose sur une structure interne Noeud qui peut être soit un
- * nœud interne, soit une feuille. Le paramètre M (M >= 2) représente le nombre
- * maximum de clés qu’un nœud peut contenir.
+ * noeud interne, soit une feuille. Le paramètre M (M >= 2) représente le nombre
+ * maximum de clés qu’un noeud peut contenir.
  *
  * Ce travail s’appuie sur les consignes du TP1 (Base de données avancée) et
  * reprend les étapes d’implémentation abordées dans le sujet :
@@ -24,19 +23,19 @@
  * Version  : 2.0
  * Date     : 27/09/2025
  */
-
 package arbreb;
 
+import java.text.Normalizer;
 import java.util.*;
 
-import java.text.Normalizer;
-
 public class ArbreB {
+
     // M >= 2
     public static int M = 3; // le nombre de clé max dans un noueud
     public Noeud racine;
 
     private static final class Noeud {
+
         public final boolean estFeuille;
         public final String[] cles;
         public final String[] valeurs;
@@ -60,23 +59,27 @@ public class ArbreB {
 
         public String toString() {
             StringBuffer b = new StringBuffer();
-            if (this.estFeuille)
+            if (this.estFeuille) {
                 b.append("Feuille(");
-            else
+            } else {
                 b.append("Noeud(");
+            }
 
-            if (!this.estFeuille)
+            if (!this.estFeuille) {
                 b.append(this.enfants[0]).append(" | ");
+            }
 
             for (int i = 0; i < this.taille; i++) {
                 b.append(this.cles[i]);
                 b.append((this.estFeuille) ? ": " : " | ");
-                if (this.estFeuille)
+                if (this.estFeuille) {
                     b.append(this.valeurs[i]);
-                else
+                } else {
                     b.append(this.enfants[i + 1]);
-                if (i + 1 < this.taille)
+                }
+                if (i + 1 < this.taille) {
                     b.append((this.estFeuille) ? ", " : " | ");
+                }
             }
 
             b.append(")");
@@ -87,11 +90,12 @@ public class ArbreB {
 
     // classe utile pour le retour de valeur
     // dans les méthodes où un split est effectué
-    public static final class Paire {
+    public static final class SplitResult {
+
         public final String cle;
         public final Noeud noeud;
 
-        public Paire(String c, Noeud n) {
+        public SplitResult(String c, Noeud n) {
             this.cle = c;
             this.noeud = n;
         }
@@ -109,17 +113,17 @@ public class ArbreB {
      * Elle retourne l’indice auquel un clé devrait être insérer dans un noeud
      * interne ou une feuille.
      * <p>
-     * On renverra M dans le cas, on devrait insérer dans un noeud plein après la
-     * dernière clé
+     * On renverra M dans le cas, on devrait insérer dans un noeud plein après
+     * la dernière clé
      * </p>
-     * 
+     *
      * @param n   la noeud dans lequel on veurt insérer la clé
      * @param cle le valeur de la clé à insérer
      * @return l'indice où insérer la clé dans la noeud
-     * 
+     *
      * @throws NullPointerException     si noeud ou clé est null
-     * @throws IllegalArgumentException si noeud ou clé est null, ou si taille est
-     *                                  incohérente
+     * @throws IllegalArgumentException si noeud ou clé est null, ou si taille
+     *                                  est incohérente
      */
     private int positionPour(Noeud n, String cle) {
 
@@ -143,27 +147,86 @@ public class ArbreB {
         for (int i = 0; i < n.taille; i++) {
 
             int cmp = cle.compareTo(n.cles[i]); // cle - n.cles[i]
-            if (cmp < 0)
+            if (cmp < 0) {
                 return i; // on insère avant la clé i
+
+            }
         }
+
+        return n.taille;
+    }
+
+    private int positionInsertion(Noeud n, String cle) {
+
+        if (n == null) {
+            throw new NullPointerException("Erreur: le noeud est null.");
+        }
+
+        if (cle == null) {
+            throw new NullPointerException("Erreur: la clé est null.");
+        }
+
+        if (n.taille < 0 || n.taille > M) {
+            throw new IllegalArgumentException(
+                    "Erreur: taille du noeud invalide (" + n.taille + "), M=" + M);
+        }
+
+        for (int i = 0; i < n.taille; i++) {
+            int cmp = cle.compareTo(n.cles[i]);
+
+            if (cmp <= 0) {
+                return i;
+            }
+        }
+
+        return n.taille;
+    }
+
+    private int positionEnfant(Noeud n, String cle) {
+
+        if (n == null) {
+            throw new NullPointerException("Erreur: le noeud est null.");
+        }
+
+        if (cle == null) {
+            throw new NullPointerException("Erreur: la clé est null.");
+        }
+
+        if (n.taille < 0 || n.taille > M) {
+            throw new IllegalArgumentException(
+                    "Erreur: taille du noeud invalide (" + n.taille + "), M=" + M);
+        }
+
+        for (int i = 0; i < n.taille; i++) {
+            int cmp = cle.compareTo(n.cles[i]);
+
+            // cle separator'dan küçükse solundaki child'a git.
+            if (cmp < 0) {
+                return i;
+            }
+
+            // cmp == 0 ise devam ederiz:
+            // for the same separator we should chosse right the child.
+        }
+
         return n.taille;
     }
 
     /**
-     * Elle décale dans un noeud non plein les clés d’une case vers la droite pour
-     * laisser la position passée en argument vide
+     * Elle décale dans un noeud non plein les clés d’une case vers la droite
+     * pour laisser la position passée en argument vide
      * <p>
-     * On décalera les valeurs
-     * dans une feuille de la même manière. Pour les noeuds internes, seules les
-     * enfants à droite des clés décalés sont déplacés.
+     * On décalera les valeurs dans une feuille de la même manière. Pour les
+     * noeuds internes, seules les enfants à droite des clés décalés sont
+     * déplacés.
      * </p>
-     * 
+     *
      * @param n   le noeud dans lequel on décale les clés
      * @param pos la position à libérer
-     * 
+     *
      * @throws NullPointerException     si noeud est null
-     * @throws IllegalArgumentException si la position est invalide ou si le noeud
-     *                                  est plein
+     * @throws IllegalArgumentException si la position est invalide ou si le
+     *                                  noeud est plein
      */
     private void decalerDeUn(Noeud n, int pos) {
 
@@ -201,23 +264,24 @@ public class ArbreB {
     }
 
     /**
-     * Elle insère, dans une feuille, une clé et une valeur à une position donnée et
-     * dans
+     * Elle insère, dans une feuille, une clé et une valeur à une position
+     * donnée et dans
      * <p>
-     * un noeud interne , insère une clé à une position donnée et un enfant à
-     * sa droite.
+     * un noeud interne , insère une clé à une position donnée et un enfant à sa
+     * droite.
      * </p>
-     * 
+     *
      * @param n      le noeud dans lequel on insère
      * @param pos    la position dans le noeud où insérer
      * @param cle    la clé à insérer
      * @param valeur la valeur à insérer (null si n n'est pas une feuille)
      * @param enfant l'enfant à insérer (null si n est une feuille)
-     * 
+     *
      * @throws NullPointerException     si noeud ou clé est null
-     * @throws IllegalArgumentException si la position est invalide ou si le noeud
-     *                                  est plein, ou si valeur/enfant est null
-     *                                  dans un contexte inapproprié
+     * @throws IllegalArgumentException si la position est invalide ou si le
+     *                                  noeud est plein, ou si valeur/enfant est
+     *                                  null dans un contexte
+     *                                  inapproprié
      */
     private void insererA(Noeud n, int pos, String cle, String valeur, Noeud enfant) {
 
@@ -260,15 +324,15 @@ public class ArbreB {
     /**
      * Elle ajoute une association clé, valeur dans un arbre. Elle applique des
      * splits sur les feuilles et les noeuds internes quand cela est nécessaire.
-     * 
+     *
      * <p>
-     * Elle fait appel à une nouvelle
-     * méthode auxiliaire récursive ajouterRec(Noeud n, String cle, String valeur).
+     * Elle fait appel à une nouvelle méthode auxiliaire récursive
+     * ajouterRec(Noeud n, String cle, String valeur).
      * </p>
-     * 
+     *
      * @param cle    la clé a ajouter
      * @param valeur la valeur associée a la clé
-     * 
+     *
      * @throws IllegalArgumentException si clé ou valeur est null
      */
     public void ajouter(String cle, String valeur) {
@@ -278,7 +342,7 @@ public class ArbreB {
         }
 
         // Main logics
-        Paire split = ajouterRec(racine, cle, valeur); // si noeud est plein, on split
+        SplitResult split = ajouterRec(racine, cle, valeur); // si noeud est plein, on split
         if (split != null) { // la racine a été splittée
             Noeud newRoot = new Noeud(false);
             newRoot.cles[0] = split.cle;
@@ -290,23 +354,23 @@ public class ArbreB {
     }
 
     /**
-     * Elle ajoute une association clé, valeur dans le sous-arbre dont la racine est
-     * Elle applique des splits sur les feuilles et les noeuds internes quand cela
-     * est nécessaire
-     * 
+     * Elle ajoute une association clé, valeur dans le sous-arbre dont la racine
+     * est Elle applique des splits sur les feuilles et les noeuds internes
+     * quand cela est nécessaire
+     *
      * <p>
      * si la clé est déjà dans l’arbre, on remplace la valeur associée à la clé
      * </p>
-     * 
+     *
      * @param n      noeud racine du sous-arbre
      * @param cle    la clé a ajouter
      * @param valeur la valeur associée a la clé
-     * @return une paire (clé médiane, nouveau noeud droit) si un split a eu lieu
-     *         null sinon
+     * @return une SplitResult (clé médiane, nouveau noeud droit) si un split a
+     *         eu lieu null sinon
      */
-    private Paire ajouterRec(Noeud n, String cle, String valeur) {
+    private SplitResult ajouterRec(Noeud n, String cle, String valeur) {
         if (n.estFeuille) {
-            int pos = positionPour(n, cle);
+            int pos = positionInsertion(n, cle);
 
             // Controle de DUPLICATE
             if (pos < n.taille && n.cles[pos].equals(cle)) {
@@ -319,22 +383,22 @@ public class ArbreB {
             updateRange(n);
 
             if (n.taille >= M) {
-                Paire p = splitFeuille(n, cle, valeur);
+                SplitResult p = splitFeuille(n, cle, valeur);
                 updateRange(n);
                 return p;
             }
             return null;
 
         } else {
-            int i = positionPour(n, cle);
-            Paire paire = ajouterRec(n.enfants[i], cle, valeur);
+            int i = positionEnfant(n, cle);
+            SplitResult SplitResult = ajouterRec(n.enfants[i], cle, valeur);
 
-            if (paire != null) {
-                insererA(n, i, paire.cle, null, paire.noeud);
+            if (SplitResult != null) {
+                insererA(n, i, SplitResult.cle, null, SplitResult.noeud);
                 updateRange(n);
 
                 if (n.taille >= M) {
-                    Paire p = splitInterne(n, paire.cle, paire.noeud);
+                    SplitResult p = splitInterne(n, SplitResult.cle, SplitResult.noeud);
                     updateRange(n);
                     return p;
                 }
@@ -345,9 +409,8 @@ public class ArbreB {
     }
 
     /**
-     * Elle retourne la valeur correspondant à une clé dans
-     * l’arbre B
-     * 
+     * Elle retourne la valeur correspondant à une clé dans l’arbre B
+     *
      * @param cle la clé à rechercher
      * @return la valeur associée à la clé ou null si la clé n'existe pas
      */
@@ -357,9 +420,9 @@ public class ArbreB {
     }
 
     /**
-     * Elle retourne la valeur correspondant à une clé dans le sous-arbre dont la
-     * racine est n.
-     * 
+     * Elle retourne la valeur correspondant à une clé dans le sous-arbre dont
+     * la racine est n.
+     *
      * @param n   le noeud racine du sous-arbre
      * @param cle la clé à rechercher
      * @return la valeur associée à la clé ou null si la clé n'existe pas
@@ -371,9 +434,9 @@ public class ArbreB {
                     return n.valeurs[i];
                 }
             }
-            return null;
+            return null; // si on ne peut pas trouver une feuille que on veut
         } else {
-            int pos = positionPour(n, cle);
+            int pos = positionEnfant(n, cle);
             return rechercheRec(n.enfants[pos], cle);
 
         }
@@ -381,23 +444,23 @@ public class ArbreB {
     }
 
     /**
-     * Elle applique un split sur une feuille pleine au moment de l’ajout d’une clé
-     * et de sa valeur.
+     * Elle applique un split sur une feuille pleine au moment de l’ajout d’une
+     * clé et de sa valeur.
      * <p>
-     * La méthode retourne une paire contenant la clé médiane à faire remonter dans
-     * le noeud interne “parent” et la nouvelle feuille issus du split à droite de
-     * la valeur médiane.
+     * La méthode retourne une SplitResult contenant la clé médiane à faire
+     * remonter dans le noeud interne “parent” et la nouvelle feuille issus du
+     * split à droite de la valeur médiane.
      * </p>
-     * On transformera le noeud sur lequel s’applique le split en le noeud à gauche
-     * de la valeur médiane.
-     * 
+     * On transformera le noeud sur lequel s’applique le split en le noeud à
+     * gauche de la valeur médiane.
+     *
      * @param n      la feuille pleine à splitter
      * @param cle    la clé à insérer
      * @param valeur la valeur à insérer
-     * @return la paire (clé médiane, nouvelle feuille droite)
+     * @return la SplitResult (clé médiane, nouvelle feuille droite)
      */
-    private Paire splitFeuille(Noeud n, String cle, String valeur) {
-        int total = n.taille; // déjà M+1 après insertion
+    private SplitResult splitFeuille(Noeud n, String cle, String valeur) {
+        int total = n.taille;
         int mid = total / 2; // position médiane
 
         Noeud droit = new Noeud(true);
@@ -417,19 +480,20 @@ public class ArbreB {
         updateRange(droit);
 
         // La clé médiane est la première de la feuille droite
-        return new Paire(droit.cles[0], droit);
+        return new SplitResult(droit.cles[0], droit);
     }
 
     /**
-     * Elle applique un split sur un noeud interne plein au moment de l’ajout d’une
-     * clé et d’un enfant.
-     * 
+     * Elle applique un split sur un noeud interne plein au moment de l’ajout
+     * d’une clé et d’un enfant.
+     *
      * @param n      le noeud interne plein à splitter
      * @param cle    la clé à insérer
      * @param enfant l'enfant à insérer
-     * @return la paire (clé médiane, nouveau noeud droit)
+     * @return la SplitResult (clé médiane, nouveau noeud droit)
      */
-    private Paire splitInterne(Noeud n, String cle, Noeud enfant) {
+    private SplitResult splitInterne(Noeud n, String cle, Noeud enfant) {
+
         // position médiane dans le noeud avec un élément en plus
         int total = n.taille;
         int posMed = total / 2;
@@ -457,13 +521,13 @@ public class ArbreB {
         updateRange(droit);
 
         // retourner la clé médiane et le noeud droit
-        return new Paire(cleMediane, droit);
+        return new SplitResult(cleMediane, droit);
     }
 
     /**
      * Elle retourne la liste des clés dans l’intervalle [borneMin, borneMax]
      * (inclus).
-     * 
+     *
      * @param borneMin la borne minimale
      * @param borneMax la borne maximale
      * @return la liste des clés dans l’intervalle [borneMin, borneMax] (inclus)
@@ -477,12 +541,12 @@ public class ArbreB {
     /**
      * Elle remplit la liste result avec les valeurs des clés dans l’intervalle
      * [min, max] (inclus) dans le sous-arbre dont la racine est n.
-     * 
+     *
      * <p>
      * On fera une optimisation en évitant de parcourir des sous-arbres qui sont
      * complètement en dehors de l’intervalle.
      * </p>
-     * 
+     *
      * @param n      le noeud racine du sous-arbre
      * @param min    la borne minimale
      * @param max    la borne maximale
@@ -511,7 +575,7 @@ public class ArbreB {
 
     /**
      * Met à jour les attributs minKey et maxKey d'un noeud.
-     * 
+     *
      * @param n le noeud à mettre à jour
      */
     private void updateRange(Noeud n) {
@@ -532,7 +596,8 @@ public class ArbreB {
      * Recherche toutes les clés de l’arbre qui commencent par un préfixe donné.
      *
      * La recherche est insensible à la casse et aux accents : le préfixe est
-     * normalisé avant la recherche et comparé à des clés normalisées dans l’arbre.
+     * normalisé avant la recherche et comparé à des clés normalisées dans
+     * l’arbre.
      *
      * @param prefix préfixe recherché
      * @return liste des valeurs associées aux clés correspondant au préfixe
@@ -551,19 +616,19 @@ public class ArbreB {
      * La recherche est insensible à la casse et aux accents : les clés et le
      * préfixe sont normalisés avant la comparaison.
      *
-     * Le mécanisme de pruning basé sur minKey/maxKey est volontairement désactivé,
-     * car les clés sont stockées dans leur forme originale alors que la comparaison
-     * se fait sur des chaînes normalisées. L’utiliser pourrait ignorer des
-     * résultats
-     * valides.
+     * Le mécanisme de pruning basé sur minKey/maxKey est volontairement
+     * désactivé, car les clés sont stockées dans leur forme originale alors que
+     * la comparaison se fait sur des chaînes normalisées. L’utiliser pourrait
+     * ignorer des résultats valides.
      *
      * @param n                noeud courant exploré
      * @param normalizedPrefix préfixe normalisé utilisé pour la comparaison
      * @param result           liste contenant les couples clé–valeur correspondants
      */
     private void recherchePrefixeRec(Noeud n, String normalizedPrefix, List<String> result) {
-        if (n == null)
+        if (n == null) {
             return;
+        }
 
         if (n.estFeuille) {
             for (int i = 0; i < n.taille; i++) {
@@ -587,7 +652,7 @@ public class ArbreB {
 
     /**
      * Formatte les clés d'un noeud pour l'affichage.
-     * 
+     *
      * @param n le noeud à formater
      * @return une chaîne représentant les clés du noeud
      */
@@ -596,17 +661,18 @@ public class ArbreB {
         sb.append("[");
         for (int i = 0; i < n.taille; i++) {
             sb.append(n.cles[i]);
-            if (i + 1 < n.taille)
+            if (i + 1 < n.taille) {
                 sb.append(", ");
+            }
         }
         sb.append("]");
         return sb.toString();
     }
 
     /**
-     * Normalise une chaîne en la convertissant en minuscules et en supprimant les
-     * accents.
-     * 
+     * Normalise une chaîne en la convertissant en minuscules et en supprimant
+     * les accents.
+     *
      * @param s la chaîne à normaliser
      * @return la chaîne normalisée
      */
@@ -617,9 +683,9 @@ public class ArbreB {
     }
 
     // -------------------- Méthodes de test et d'affichage -------------------
-
     /**
-     * Prints the B-tree structure without exposing internal node representation.
+     * Prints the B-tree structure without exposing internal node
+     * representation.
      */
     public void prettyPrint() {
         prettyPrintRec(this.racine, "", true);

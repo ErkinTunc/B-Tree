@@ -1,8 +1,7 @@
 package app;
 
 /**
- * Program entry point.
- * Lance les scénarios de démonstration pour l'arbre B.
+ * Program entry point. Lance les scénarios de démonstration pour l'arbre B.
  */
 public class Main {
 
@@ -13,12 +12,18 @@ public class Main {
         }
 
         switch (args[0].toLowerCase()) {
+
+            // Testing with a simple data set
             case "simple":
                 ArbreBTests.testSimple();
                 break;
+
+            // Testing with a more profound dataset
             case "communes":
                 ArbreBTests.testCommunes();
                 break;
+
+            // 
             default:
                 System.out.println("Usage: java app.Main [simple|communes]");
                 break;
