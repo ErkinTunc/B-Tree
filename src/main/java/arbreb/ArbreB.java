@@ -403,9 +403,10 @@ public class ArbreB {
                     return p;
                 }
             }
+
+            updateRange(n);
             return null;
         }
-
     }
 
     /**
