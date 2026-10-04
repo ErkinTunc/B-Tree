@@ -11,6 +11,8 @@ final class Noeud {
     String minKey;
     String maxKey;
 
+    // ----------------- Constructor ---------------
+
     Noeud(boolean feuille) {
         this.estFeuille = feuille;
         this.cles = new String[ArbreB.M];
@@ -23,22 +25,7 @@ final class Noeud {
         }
     }
 
-    /**
-     * ArbreB.Met à jour les attributsArbreB.MinKey etArbreB.MaxKey d'un noeud.
-     */
-    void updateRange() {
-        if (estFeuille) {
-            if (taille > 0) {
-                minKey = cles[0];
-                maxKey = cles[taille - 1];
-            }
-        } else {
-            if (taille > 0) {
-                minKey = enfants[0].minKey;
-                maxKey = enfants[taille].maxKey;
-            }
-        }
-    }
+    // ------------------- Methods --------------------
 
     /**
      * Retourne l'enfant à parcourir pour une clé.
@@ -57,7 +44,6 @@ final class Noeud {
      * Retourne la position d'insertion d'une clé dans une feuille.
      * Si la clé existe déjà, retourne sa position.
      *
-     * @param n   le noeud feuille
      * @param cle la clé à insérer
      * @return la position d'insertion
      * @throws NullPointerException     si le noeud ou la clé est null
@@ -83,57 +69,6 @@ final class Noeud {
         }
 
         return this.taille;
-    }
-
-    /**
-     * Elle décale dans un noeud non plein les clés d’une case vers la droite
-     * pour laisser la position passée en argument vide
-     * <p>
-     * On décalera les valeurs dans une feuille de laArbreB.MêmeArbreB.Manière. Pour
-     * les
-     * noeuds internes, seules les enfants à droite des clés décalés sont
-     * déplacés.
-     * </p>
-     *
-     * @param n   le noeud dans lequel on décale les clés
-     * @param pos la position à libérer
-     *
-     * @throws NullPointerException     si noeud est null
-     * @throws IllegalArgumentException si la position est invalide ou si le
-     *                                  noeud est plein
-     */
-    private void decalerDeUn(int pos) {
-
-        // Error handling
-
-        if (pos < 0 || pos > this.taille) {
-            throw new IllegalArgumentException(
-                    "Erreur: position " + pos + " invalide pour un noeud de taille " + this.taille);
-        }
-        if (this.taille >= ArbreB.M) {
-            throw new IllegalArgumentException(
-                    "Erreur: impossible de décaler, le noeud est déjà plein (taille=" + this.taille + ",ArbreB.M="
-                            + ArbreB.M + ")");
-        }
-
-        // ArbreB.Main logic
-        if (this.taille == ArbreB.M) {
-            System.err.println("Noeud est plein");
-        }
-
-        for (int i = this.taille - 1; i >= pos; i--) {
-            this.cles[i + 1] = this.cles[i];
-            if (this.estFeuille) {
-                this.valeurs[i + 1] = this.valeurs[i];
-            }
-        }
-
-        if (!this.estFeuille) {
-            for (int i = this.taille; i >= pos + 1; i--) {
-                this.enfants[i + 1] = this.enfants[i];
-            }
-            // Not: enfants[pos] yerinde kalır; yeni çocuk pos+1'e konur.
-        }
     }
 
     /**
@@ -192,6 +127,57 @@ final class Noeud {
         this.taille++;
     }
 
+    /**
+     * Elle décale dans un noeud non plein les clés d’une case vers la droite
+     * pour laisser la position passée en argument vide
+     * <p>
+     * On décalera les valeurs dans une feuille de laArbreB.MêmeArbreB.Manière. Pour
+     * les
+     * noeuds internes, seules les enfants à droite des clés décalés sont
+     * déplacés.
+     * </p>
+     *
+     * @param n   le noeud dans lequel on décale les clés
+     * @param pos la position à libérer
+     *
+     * @throws NullPointerException     si noeud est null
+     * @throws IllegalArgumentException si la position est invalide ou si le
+     *                                  noeud est plein
+     */
+    private void decalerDeUn(int pos) {
+
+        // Error handling
+
+        if (pos < 0 || pos > this.taille) {
+            throw new IllegalArgumentException(
+                    "Erreur: position " + pos + " invalide pour un noeud de taille " + this.taille);
+        }
+        if (this.taille >= ArbreB.M) {
+            throw new IllegalArgumentException(
+                    "Erreur: impossible de décaler, le noeud est déjà plein (taille=" + this.taille + ",ArbreB.M="
+                            + ArbreB.M + ")");
+        }
+
+        // ArbreB.Main logic
+        if (this.taille == ArbreB.M) {
+            System.err.println("Noeud est plein");
+        }
+
+        for (int i = this.taille - 1; i >= pos; i--) {
+            this.cles[i + 1] = this.cles[i];
+            if (this.estFeuille) {
+                this.valeurs[i + 1] = this.valeurs[i];
+            }
+        }
+
+        if (!this.estFeuille) {
+            for (int i = this.taille; i >= pos + 1; i--) {
+                this.enfants[i + 1] = this.enfants[i];
+            }
+            // Not: enfants[pos] yerinde kalır; yeni çocuk pos+1'e konur.
+        }
+    }
+
     public String toString() {
         StringBuffer b = new StringBuffer();
         if (this.estFeuille) {
@@ -221,4 +207,22 @@ final class Noeud {
 
         return b.toString();
     }
+
+    /**
+     * ArbreB.Met à jour les attributsArbreB.MinKey etArbreB.MaxKey d'un noeud.
+     */
+    void updateRange() {
+        if (estFeuille) {
+            if (taille > 0) {
+                minKey = cles[0];
+                maxKey = cles[taille - 1];
+            }
+        } else {
+            if (taille > 0) {
+                minKey = enfants[0].minKey;
+                maxKey = enfants[taille].maxKey;
+            }
+        }
+    }
+
 }

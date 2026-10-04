@@ -5,9 +5,13 @@ import java.util.List;
 
 final class BTreeSearch {
 
+    // ----------------- Constructor ---------------
+
     private BTreeSearch() {
         // Utility class
     }
+
+    // ------------------- Methods --------------------
 
     /**
      * Recherche une valeur par clé.

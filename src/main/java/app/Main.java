@@ -7,7 +7,7 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         if (args.length == 0) {
-            ArbreBTests.testCommunes();
+            BTreeDemo.runCommunesDemo();
             return;
         }
 
@@ -15,12 +15,12 @@ public class Main {
 
             // Testing with a simple data set
             case "simple":
-                ArbreBTests.testSimple();
+                BTreeDemo.runSimpleDemo();
                 break;
 
             // Testing with a more profound dataset
             case "communes":
-                ArbreBTests.testCommunes();
+                BTreeDemo.runCommunesDemo();
                 break;
 
             // 

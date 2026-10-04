@@ -33,6 +33,8 @@ public class ArbreB {
     public static int M = 3; // le nombre de clé max dans un noueud
     private Noeud racine;
 
+    // ----------------- Helper Class -----------------
+
     // classe utile pour le retour de valeur
     // dans les méthodes où un split est effectué
     private static final class SplitResult {
@@ -50,9 +52,13 @@ public class ArbreB {
         }
     }
 
+    // ----------------- Constructor  ---------------
+
     public ArbreB() {
         this.racine = new Noeud(true);
     }
+
+    // ------------------- Methods --------------------
 
     /**
      * Elle ajoute une association clé, valeur dans un arbre. Elle applique des
@@ -240,6 +246,8 @@ public class ArbreB {
     public void prettyPrint() {
         BTreePrinter.print(racine);
     }
+
+    // ---------------- To String ----------------------------
 
     public String toString() {
         StringBuffer b = new StringBuffer();
