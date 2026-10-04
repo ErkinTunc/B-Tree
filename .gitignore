@@ -1,13 +1,32 @@
-# Compiled files
-*.class
-
 # Build directories
 build/
 target/
 out/
 
-# Logs
+# Gradle caches and generated files
+.gradle/
+build/
+**/build/
+
+# Java compiled files
+*.class
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# VS Code local settings
+.vscode/
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# Other generated files
+out/
 *.log
 
-# IDE
-.vscode/
+# Operating system files
+.DS_Store
+Thumbs.db

@@ -1,202 +1,93 @@
 # B-Tree Indexing Engine in Java
 
-This project implements a **B-Tree based indexing engine in Java** for
-efficient storage and retrieval of large key-value datasets.
+A Java implementation of an **in-memory B-Tree indexing engine** for efficient
+storage and retrieval of key-value datasets.
 
-Originally developed as part of an Advanced Databases assignment, the
-project has been extended into a practical indexing engine capable of
-handling real datasets and supporting advanced search operations.
-
-The system demonstrates how databases use B-Tree structures to provide
-fast and scalable data access.
-
----
-
-## Project Goals
-
-The project demonstrates:
-
-- Implementation of a B-Tree index structure
-- Efficient key-value storage
-- Logarithmic search performance
-- Interval and prefix queries
-- Indexing of large datasets
-- Foundations of database indexing systems
-
-The goal is to simulate how database engines organize and query indexed
-data efficiently.
-
----
-
-## Repository Structure
-
-    B-TREE/
-    │
-    ├── data/
-    │   └── communes.txt          Dataset used for indexing demo
-    │
-    ├── docs/
-    │   └── tp1.pdf               Original academic assignment
-    │
-    ├── src/main/java/
-    │   ├── arbreb/
-    │   │   └── ArbreB.java       B-Tree implementation
-    │   │
-    │   └── app/
-    │       ├── Main.java         Program entry point
-    │       └── ArbreBTests.java  Demo & test scenarios
-    │
-    ├── run.bat                   Windows launcher
-    ├── run.sh                    Linux/macOS launcher
-    ├── project_roadmap.md        Development roadmap
-    └── README.md
-
----
+Originally developed for an Advanced Databases course, the project is being
+refactored into a more complete indexing/storage-engine study with automated
+testing, benchmarking, and persistent storage as future milestones.
 
 ## Features
 
-Current implementation supports:
-
 - Key-value insertion
-- Key search
-- Interval search
-- Prefix search
-- Automatic node splitting
-- Balanced tree maintenance
-- Dataset indexing demo
-- Tree structure visualization in console
+- Exact search
+- Range queries
+- Case-insensitive prefix search
+- Accent-insensitive prefix search
+- Leaf and internal node splitting
+- Duplicate-key replacement
+- `minKey` / `maxKey` based range pruning
+- JUnit 5 regression tests
+- Gradle build system
 
-The B-Tree remains balanced automatically, ensuring efficient operations
-even for large datasets.
+## Project Goals
 
----
+The project focuses on practical concepts used by database indexing systems:
 
-## Running the Project
+- B-Tree algorithms
+- Data indexing and retrieval
+- Tree balancing and node splitting
+- Query optimization
+- Regression testing
+- Performance engineering
+- Storage-engine fundamentals
 
-### Windows
+## Documentation
 
-Run one of the demo modes:
+More technical details are available here:
 
-    .\run.bat simple
+- [Architecture](docs/architecture.md)
+- [Testing Strategy](docs/testing.md)
+- [Project Roadmap](docs/roadmap.md)
+- [Design Decisions](docs/design-decisions.md)
 
-or
+## How to run
+Run with the run task, which assembles and executes the application
+1. > ./gradlew run
+  
+   
+   Runs the simple B-Tree insertion and search demo
+   - > ./gradlew run --args="simple"
+     
+   Runs the B-Tree demo using the communes dataset  
+   - > ./gradlew run --args="communes"
 
-    .\run.bat communes
 
----
+Builds the project and runs the tests
 
-### Linux / macOS
+2. > ./gradlew build
+3. > ./gradlew clean
 
-    ./run.sh simple
+  Runs the test task for all subprojects when invoked from the root project
+- > ./gradlew test
+   
+   To see the details of the tests on the browser.
+  - > build/reports/tests/test/index.html
 
-or
+    
 
-    ./run.sh communes
+## Testing
 
----
+The project uses **JUnit 5** to protect insertion, search, split, range-query,
+prefix-search and regression behavior during refactoring.
 
-## Demo Modes
+See [Testing Strategy](docs/testing.md) for the full test plan.
 
-### Simple Demo
+## Roadmap
 
-    .\run.bat simple
+Current development focuses on:
 
-Demonstrates step-by-step insertion into the B-Tree with console
-visualization of node splits and tree structure evolution.
+**Correctness → Refactoring → Invariant Tests → Dataset Integration → Benchmarks → Persistence**
 
-Also performs an interval query demonstration.
+See the [full roadmap](docs/roadmap.md).
 
-Example output:
+## Tech Stack
 
-    B-Tree === Insert <e> ===
-    └── [e]
-    --------------------------------
-    B-Tree === Insert <a> ===
-    └── [a, e]
+`Java` · `Gradle` · `JUnit 5` · `Git`
 
----
+## Current Status
 
-### Dataset Demo
+The current version is an **in-memory B-Tree index**.
 
-    .\run.bat communes
-
-Loads \~35k French municipalities and builds a B-Tree index.
-
-Outputs:
-
-- dataset size
-- index build time
-- lookup performance
-- prefix search results
-
-Example:
-
-    === B-Tree Index Report ===
-    Records indexed: 34980
-    Build time: 189 ms
-    Lookup 'Chinon': F1.32.365
-    Lookup 'Mars'  : F1.14.31
-    Lookup time (2 queries): 0 ms
-
----
-
-## Example Usage in Code
-
-```java
-ArbreB tree = new ArbreB();
-
-tree.ajouter("Paris", "city");
-tree.ajouter("Lyon", "city");
-
-String value = tree.recherche("Paris");
-System.out.println(value);
-```
-
----
-
-## Dataset
-
-The demo uses:
-
-    data/communes.txt
-
-containing French municipalities, allowing realistic indexing tests.
-
----
-
-## Learning Outcomes
-
-This project illustrates:
-
-- Balanced tree behavior
-- Node splitting mechanics
-- Efficient data indexing
-- Prefix and interval query design
-- Practical database indexing concepts
-
----
-
-## Future Improvements
-
-Planned upgrades include:
-
-- Interactive CLI query interface
-- Disk-based node storage
-- Performance benchmarking tools
-- Unit tests
-- Tree visualization improvements
-- Persistent indexes between runs
-
----
-
-## CV Project Description Example
-
-> Implemented a B-tree based indexing engine in Java to efficiently
-> index and query large datasets, supporting prefix and interval
-> searches with logarithmic-time performance.
-
----
-
-## License
-
-Released under the MIT License.
+Persistent page-based storage and performance benchmarking are planned future
+milestones and will only be documented as completed once implemented.
