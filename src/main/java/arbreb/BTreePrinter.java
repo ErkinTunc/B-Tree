@@ -33,6 +33,12 @@ final class BTreePrinter {
         }
     }
 
+        /**
+     * Formatte les clés d'un noeud pour l'affichage.
+     *
+     * @param n le noeud à formater
+     * @return une chaîne représentant les clés du noeud
+     */
     private static String formatKeys(Noeud n) {
         StringBuilder sb = new StringBuilder("[");
 

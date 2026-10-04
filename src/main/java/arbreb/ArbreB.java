@@ -25,72 +25,17 @@
  */
 package arbreb;
 
-import java.text.Normalizer;
 import java.util.*;
 
 public class ArbreB {
 
     // M >= 2
     public static int M = 3; // le nombre de clé max dans un noueud
-    public Noeud racine;
-
-    private static final class Noeud {
-
-        public final boolean estFeuille;
-        public final String[] cles;
-        public final String[] valeurs;
-        public final Noeud[] enfants;
-        public int taille = 0;
-
-        public String minKey;
-        public String maxKey;
-
-        public Noeud(boolean feuille) {
-            this.estFeuille = feuille;
-            this.cles = new String[M];
-            if (estFeuille) {
-                this.valeurs = new String[M];
-                this.enfants = null;
-            } else {
-                this.valeurs = null;
-                this.enfants = new Noeud[M + 1];
-            }
-        }
-
-        public String toString() {
-            StringBuffer b = new StringBuffer();
-            if (this.estFeuille) {
-                b.append("Feuille(");
-            } else {
-                b.append("Noeud(");
-            }
-
-            if (!this.estFeuille) {
-                b.append(this.enfants[0]).append(" | ");
-            }
-
-            for (int i = 0; i < this.taille; i++) {
-                b.append(this.cles[i]);
-                b.append((this.estFeuille) ? ": " : " | ");
-                if (this.estFeuille) {
-                    b.append(this.valeurs[i]);
-                } else {
-                    b.append(this.enfants[i + 1]);
-                }
-                if (i + 1 < this.taille) {
-                    b.append((this.estFeuille) ? ", " : " | ");
-                }
-            }
-
-            b.append(")");
-
-            return b.toString();
-        }
-    }
+    private Noeud racine;
 
     // classe utile pour le retour de valeur
     // dans les méthodes où un split est effectué
-    public static final class SplitResult {
+    private static final class SplitResult {
 
         public final String cle;
         public final Noeud noeud;
@@ -107,218 +52,6 @@ public class ArbreB {
 
     public ArbreB() {
         this.racine = new Noeud(true);
-    }
-
-    /**
-     * Elle retourne l’indice auquel un clé devrait être insérer dans un noeud
-     * interne ou une feuille.
-     * <p>
-     * On renverra M dans le cas, on devrait insérer dans un noeud plein après
-     * la dernière clé
-     * </p>
-     *
-     * @param n   la noeud dans lequel on veurt insérer la clé
-     * @param cle le valeur de la clé à insérer
-     * @return l'indice où insérer la clé dans la noeud
-     *
-     * @throws NullPointerException     si noeud ou clé est null
-     * @throws IllegalArgumentException si noeud ou clé est null, ou si taille
-     *                                  est incohérente
-     */
-    private int positionPour(Noeud n, String cle) {
-
-        // Error handling
-        if (n == null) {
-            throw new NullPointerException("Erreur: le noeud est null.");
-        }
-        if (cle == null) {
-            throw new NullPointerException("Erreur: la clé est null.");
-        }
-        if (n.taille < 0 || n.taille > M) {
-            throw new IllegalArgumentException(
-                    "Erreur: taille du noeud invalide (" + n.taille + "), M=" + M);
-        }
-
-        // Main logic
-        if (n.taille == M) {
-            return M; // le noeud est plein, on insère après la dernière clé
-        }
-
-        for (int i = 0; i < n.taille; i++) {
-
-            int cmp = cle.compareTo(n.cles[i]); // cle - n.cles[i]
-            if (cmp < 0) {
-                return i; // on insère avant la clé i
-
-            }
-        }
-
-        return n.taille;
-    }
-
-    private int positionInsertion(Noeud n, String cle) {
-
-        if (n == null) {
-            throw new NullPointerException("Erreur: le noeud est null.");
-        }
-
-        if (cle == null) {
-            throw new NullPointerException("Erreur: la clé est null.");
-        }
-
-        if (n.taille < 0 || n.taille > M) {
-            throw new IllegalArgumentException(
-                    "Erreur: taille du noeud invalide (" + n.taille + "), M=" + M);
-        }
-
-        for (int i = 0; i < n.taille; i++) {
-            int cmp = cle.compareTo(n.cles[i]);
-
-            if (cmp <= 0) {
-                return i;
-            }
-        }
-
-        return n.taille;
-    }
-
-    private int positionEnfant(Noeud n, String cle) {
-
-        if (n == null) {
-            throw new NullPointerException("Erreur: le noeud est null.");
-        }
-
-        if (cle == null) {
-            throw new NullPointerException("Erreur: la clé est null.");
-        }
-
-        if (n.taille < 0 || n.taille > M) {
-            throw new IllegalArgumentException(
-                    "Erreur: taille du noeud invalide (" + n.taille + "), M=" + M);
-        }
-
-        for (int i = 0; i < n.taille; i++) {
-            int cmp = cle.compareTo(n.cles[i]);
-
-            // cle separator'dan küçükse solundaki child'a git.
-            if (cmp < 0) {
-                return i;
-            }
-
-            // cmp == 0 ise devam ederiz:
-            // for the same separator we should chosse right the child.
-        }
-
-        return n.taille;
-    }
-
-    /**
-     * Elle décale dans un noeud non plein les clés d’une case vers la droite
-     * pour laisser la position passée en argument vide
-     * <p>
-     * On décalera les valeurs dans une feuille de la même manière. Pour les
-     * noeuds internes, seules les enfants à droite des clés décalés sont
-     * déplacés.
-     * </p>
-     *
-     * @param n   le noeud dans lequel on décale les clés
-     * @param pos la position à libérer
-     *
-     * @throws NullPointerException     si noeud est null
-     * @throws IllegalArgumentException si la position est invalide ou si le
-     *                                  noeud est plein
-     */
-    private void decalerDeUn(Noeud n, int pos) {
-
-        // Error handling
-        if (n == null) {
-            throw new NullPointerException("Erreur: le noeud est null.");
-        }
-        if (pos < 0 || pos > n.taille) {
-            throw new IllegalArgumentException(
-                    "Erreur: position " + pos + " invalide pour un noeud de taille " + n.taille);
-        }
-        if (n.taille >= M) {
-            throw new IllegalArgumentException(
-                    "Erreur: impossible de décaler, le noeud est déjà plein (taille=" + n.taille + ", M=" + M + ")");
-        }
-
-        // Main logic
-        if (n.taille == M) {
-            System.err.println("Noeud est plein");
-        }
-
-        for (int i = n.taille - 1; i >= pos; i--) {
-            n.cles[i + 1] = n.cles[i];
-            if (n.estFeuille) {
-                n.valeurs[i + 1] = n.valeurs[i];
-            }
-        }
-
-        if (!n.estFeuille) {
-            for (int i = n.taille; i >= pos + 1; i--) {
-                n.enfants[i + 1] = n.enfants[i];
-            }
-            // Not: enfants[pos] yerinde kalır; yeni çocuk pos+1'e konur.
-        }
-    }
-
-    /**
-     * Elle insère, dans une feuille, une clé et une valeur à une position
-     * donnée et dans
-     * <p>
-     * un noeud interne , insère une clé à une position donnée et un enfant à sa
-     * droite.
-     * </p>
-     *
-     * @param n      le noeud dans lequel on insère
-     * @param pos    la position dans le noeud où insérer
-     * @param cle    la clé à insérer
-     * @param valeur la valeur à insérer (null si n n'est pas une feuille)
-     * @param enfant l'enfant à insérer (null si n est une feuille)
-     *
-     * @throws NullPointerException     si noeud ou clé est null
-     * @throws IllegalArgumentException si la position est invalide ou si le
-     *                                  noeud est plein, ou si valeur/enfant est
-     *                                  null dans un contexte
-     *                                  inapproprié
-     */
-    private void insererA(Noeud n, int pos, String cle, String valeur, Noeud enfant) {
-
-        // Error handling
-        if (n == null) {
-            throw new NullPointerException("Erreur: noeud est null.");
-        }
-        if (cle == null) {
-            throw new NullPointerException("Erreur: clé est null.");
-        }
-        if (pos < 0 || pos > n.taille) {
-            throw new IllegalArgumentException(
-                    "Erreur: position " + pos + " invalide pour un noeud de taille " + n.taille);
-        }
-        if (n.taille >= M) {
-            throw new IllegalArgumentException(
-                    "Erreur: le noeud est déjà plein (taille=" + n.taille + ", M=" + M + ")");
-        }
-
-        // Vérification cohérence feuille/interne
-        if (n.estFeuille && valeur == null) {
-            throw new IllegalArgumentException("Erreur: valeur ne peut pas être null dans une feuille.");
-        }
-        if (!n.estFeuille && enfant == null) {
-            throw new IllegalArgumentException("Erreur: enfant ne peut pas être null dans un noeud interne.");
-        }
-
-        // Main logic
-        decalerDeUn(n, pos);
-        n.cles[pos] = cle;
-
-        if (n.estFeuille) {
-            n.valeurs[pos] = valeur;
-        } else {
-            n.enfants[pos + 1] = enfant;
-        }
-        n.taille++;
     }
 
     /**
@@ -369,79 +102,46 @@ public class ArbreB {
      *         eu lieu null sinon
      */
     private SplitResult ajouterRec(Noeud n, String cle, String valeur) {
-        if (n.estFeuille) {
-            int pos = positionInsertion(n, cle);
 
-            // Controle de DUPLICATE
+        if (n.estFeuille) {
+            int pos = n.positionInsertion(cle);
+
+            // Remplace la valeur si la clé existe déjà.
             if (pos < n.taille && n.cles[pos].equals(cle)) {
-                // si il est déjà dans l'arbre, on remplace la valeur
                 n.valeurs[pos] = valeur;
-                return null; // pas de split, on arrête là
+                return null;
             }
 
-            insererA(n, pos, cle, valeur, null);
-            updateRange(n);
+            n.insererA(pos, cle, valeur, null);
 
             if (n.taille >= M) {
-                SplitResult p = splitFeuille(n, cle, valeur);
-                updateRange(n);
-                return p;
-            }
-            return null;
-
-        } else {
-            int i = positionEnfant(n, cle);
-            SplitResult SplitResult = ajouterRec(n.enfants[i], cle, valeur);
-
-            if (SplitResult != null) {
-                insererA(n, i, SplitResult.cle, null, SplitResult.noeud);
-                updateRange(n);
-
-                if (n.taille >= M) {
-                    SplitResult p = splitInterne(n, SplitResult.cle, SplitResult.noeud);
-                    updateRange(n);
-                    return p;
-                }
+                return splitFeuille(n, cle, valeur);
             }
 
-            updateRange(n);
+            n.updateRange();
             return null;
         }
-    }
 
-    /**
-     * Elle retourne la valeur correspondant à une clé dans l’arbre B
-     *
-     * @param cle la clé à rechercher
-     * @return la valeur associée à la clé ou null si la clé n'existe pas
-     */
-    public String recherche(String cle) {
-        String val = rechercheRec(racine, cle);
-        return val;
-    }
+        int childIndex = n.positionEnfant(cle);
+        SplitResult splitResult = ajouterRec(n.enfants[childIndex], cle, valeur);
 
-    /**
-     * Elle retourne la valeur correspondant à une clé dans le sous-arbre dont
-     * la racine est n.
-     *
-     * @param n   le noeud racine du sous-arbre
-     * @param cle la clé à rechercher
-     * @return la valeur associée à la clé ou null si la clé n'existe pas
-     */
-    private String rechercheRec(Noeud n, String cle) {
-        if (n.estFeuille) {
-            for (int i = 0; i < n.taille; i++) {
-                if (n.cles[i].equals(cle)) { // REMINDER: "==" for pointers , ".equals()" for objects
-                    return n.valeurs[i];
-                }
+        if (splitResult != null) {
+            n.insererA(
+                    childIndex,
+                    splitResult.cle,
+                    null,
+                    splitResult.noeud);
+
+            if (n.taille >= M) {
+                return splitInterne(
+                        n,
+                        splitResult.cle,
+                        splitResult.noeud);
             }
-            return null; // si on ne peut pas trouver une feuille que on veut
-        } else {
-            int pos = positionEnfant(n, cle);
-            return rechercheRec(n.enfants[pos], cle);
-
         }
 
+        n.updateRange();
+        return null;
     }
 
     /**
@@ -477,8 +177,8 @@ public class ArbreB {
         n.taille = mid;
 
         // Mettre à jour les minKey et maxKey
-        updateRange(n);
-        updateRange(droit);
+        n.updateRange();
+        droit.updateRange();
 
         // La clé médiane est la première de la feuille droite
         return new SplitResult(droit.cles[0], droit);
@@ -518,131 +218,27 @@ public class ArbreB {
         n.taille = posMed;
 
         // Mettre à jour les minKey et maxKey
-        updateRange(n);
-        updateRange(droit);
+        n.updateRange();
+        droit.updateRange();
 
         // retourner la clé médiane et le noeud droit
         return new SplitResult(cleMediane, droit);
     }
 
-    /**
-     * Elle retourne la liste des clés dans l’intervalle [borneMin, borneMax]
-     * (inclus).
-     *
-     * @param borneMin la borne minimale
-     * @param borneMax la borne maximale
-     * @return la liste des clés dans l’intervalle [borneMin, borneMax] (inclus)
-     */
-    public List<String> rechercheIntervalle(String borneMin, String borneMax) {
-        List<String> result = new ArrayList<>();
-        rechercheIntervalleRec(racine, borneMin, borneMax, result);
-        return result;
+    public String recherche(String cle) {
+        return BTreeSearch.exact(racine, cle);
     }
 
-    /**
-     * Elle remplit la liste result avec les valeurs des clés dans l’intervalle
-     * [min, max] (inclus) dans le sous-arbre dont la racine est n.
-     *
-     * <p>
-     * On fera une optimisation en évitant de parcourir des sous-arbres qui sont
-     * complètement en dehors de l’intervalle.
-     * </p>
-     *
-     * @param n      le noeud racine du sous-arbre
-     * @param min    la borne minimale
-     * @param max    la borne maximale
-     * @param result la liste des résultats
-     */
-    private void rechercheIntervalleRec(Noeud n, String min, String max, List<String> result) {
-        // OPTIMISATION : prune subtrees completely outside [min, max]
-        if (n.minKey != null && n.maxKey != null) {
-            if (n.maxKey.compareTo(min) < 0 || n.minKey.compareTo(max) > 0) {
-                return; // Ce sous-arbre est complètement hors de l'intervalle
-            }
-        }
-
-        if (n.estFeuille) {
-            for (int i = 0; i < n.taille; i++) {
-                if (n.cles[i].compareTo(min) >= 0 && n.cles[i].compareTo(max) <= 0) {
-                    result.add(n.valeurs[i]);
-                }
-            }
-        } else {
-            for (int i = 0; i <= n.taille; i++) {
-                rechercheIntervalleRec(n.enfants[i], min, max, result);
-            }
-        }
+    public List<String> rechercheIntervalle(String min, String max) {
+        return BTreeSearch.range(racine, min, max);
     }
 
-    /**
-     * Met à jour les attributs minKey et maxKey d'un noeud.
-     *
-     * @param n le noeud à mettre à jour
-     */
-    private void updateRange(Noeud n) {
-        if (n.estFeuille) {
-            if (n.taille > 0) {
-                n.minKey = n.cles[0];
-                n.maxKey = n.cles[n.taille - 1];
-            }
-        } else {
-            if (n.taille > 0) {
-                n.minKey = n.enfants[0].minKey;
-                n.maxKey = n.enfants[n.taille].maxKey;
-            }
-        }
-    }
-
-    /**
-     * Recherche toutes les clés de l’arbre qui commencent par un préfixe donné.
-     *
-     * La recherche est insensible à la casse et aux accents : le préfixe est
-     * normalisé avant la recherche et comparé à des clés normalisées dans
-     * l’arbre.
-     *
-     * @param prefix préfixe recherché
-     * @return liste des valeurs associées aux clés correspondant au préfixe
-     */
     public List<String> recherchePrefixe(String prefix) {
-        List<String> result = new ArrayList<>();
-        String normalizedPrefix = normalize(prefix);
-        recherchePrefixeRec(racine, normalizedPrefix, result);
-        return result;
+        return BTreeSearch.prefix(racine, prefix);
     }
 
-    /**
-     * Recherche récursivement toutes les clés d’un sous-arbre qui commencent
-     * par un préfixe donné.
-     *
-     * La recherche est insensible à la casse et aux accents : les clés et le
-     * préfixe sont normalisés avant la comparaison.
-     *
-     * Le mécanisme de pruning basé sur minKey/maxKey est volontairement
-     * désactivé, car les clés sont stockées dans leur forme originale alors que
-     * la comparaison se fait sur des chaînes normalisées. L’utiliser pourrait
-     * ignorer des résultats valides.
-     *
-     * @param n                noeud courant exploré
-     * @param normalizedPrefix préfixe normalisé utilisé pour la comparaison
-     * @param result           liste contenant les couples clé–valeur correspondants
-     */
-    private void recherchePrefixeRec(Noeud n, String normalizedPrefix, List<String> result) {
-        if (n == null) {
-            return;
-        }
-
-        if (n.estFeuille) {
-            for (int i = 0; i < n.taille; i++) {
-                String normalizedKey = normalize(n.cles[i]);
-                if (normalizedKey.startsWith(normalizedPrefix)) {
-                    result.add(n.cles[i] + " -> " + n.valeurs[i]);
-                }
-            }
-        } else {
-            for (int i = 0; i <= n.taille; i++) {
-                recherchePrefixeRec(n.enfants[i], normalizedPrefix, result);
-            }
-        }
+    public void prettyPrint() {
+        BTreePrinter.print(racine);
     }
 
     public String toString() {
@@ -651,60 +247,4 @@ public class ArbreB {
         return b.toString();
     }
 
-    /**
-     * Formatte les clés d'un noeud pour l'affichage.
-     *
-     * @param n le noeud à formater
-     * @return une chaîne représentant les clés du noeud
-     */
-    private String formatKeys(Noeud n) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("[");
-        for (int i = 0; i < n.taille; i++) {
-            sb.append(n.cles[i]);
-            if (i + 1 < n.taille) {
-                sb.append(", ");
-            }
-        }
-        sb.append("]");
-        return sb.toString();
-    }
-
-    /**
-     * Normalise une chaîne en la convertissant en minuscules et en supprimant
-     * les accents.
-     *
-     * @param s la chaîne à normaliser
-     * @return la chaîne normalisée
-     */
-    static String normalize(String s) {
-        String lower = s.toLowerCase(java.util.Locale.ROOT);
-        return Normalizer.normalize(lower, Normalizer.Form.NFD)
-                .replaceAll("\\p{M}", ""); // remove accents
-    }
-
-    // -------------------- Méthodes de test et d'affichage -------------------
-    /**
-     * Prints the B-tree structure without exposing internal node
-     * representation.
-     */
-    public void prettyPrint() {
-        prettyPrintRec(this.racine, "", true);
-    }
-
-    private void prettyPrintRec(Noeud n, String prefix, boolean isTail) {
-        if (n == null) {
-            System.out.println(prefix + (isTail ? "└── " : "├── ") + "null");
-            return;
-        }
-
-        System.out.println(prefix + (isTail ? "└── " : "├── ") + formatKeys(n));
-
-        if (!n.estFeuille) {
-            for (int i = 0; i <= n.taille; i++) {
-                boolean last = (i == n.taille);
-                prettyPrintRec(n.enfants[i], prefix + (isTail ? "    " : "│   "), last);
-            }
-        }
-    }
 }
