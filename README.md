@@ -1,5 +1,3 @@
-
-
 # B-Tree Indexing Engine in Java
 [![Java CI](https://github.com/ErkinTunc/B-Tree/actions/workflows/gradle.yml/badge.svg)](https://github.com/ErkinTunc/B-Tree/actions/workflows/gradle.yml)
 
