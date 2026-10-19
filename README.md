@@ -1,5 +1,7 @@
-# B-Tree Indexing Engine in Java
 
+
+# B-Tree Indexing Engine in Java
+[![Java CI](https://github.com/ErkinTunc/B-Tree/actions/workflows/gradle.yml/badge.svg)](https://github.com/ErkinTunc/B-Tree/actions/workflows/gradle.yml)
 A Java implementation of an **in-memory B-Tree indexing engine** for efficient
 storage and retrieval of key-value datasets.
 
@@ -73,6 +75,9 @@ prefix-search and regression behavior during refactoring.
 
 See [Testing Strategy](docs/testing.md) for the full test plan.
 
+**CI:** Automated Gradle builds and JUnit 5 tests via GitHub Actions.
+
+
 ## Roadmap
 
 Current development focuses on:
@@ -83,7 +88,7 @@ See the [full roadmap](docs/roadmap.md).
 
 ## Tech Stack
 
-`Java` · `Gradle` · `JUnit 5` · `Git`
+`Java` · `Gradle` · `JUnit 5` · `Git` · `GitHub Actions (CI)`
 
 ## Current Status
 
