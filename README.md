@@ -1,7 +1,6 @@
-
-
 # B-Tree Indexing Engine in Java
 [![Java CI](https://github.com/ErkinTunc/B-Tree/actions/workflows/gradle.yml/badge.svg)](https://github.com/ErkinTunc/B-Tree/actions/workflows/gradle.yml)
+
 A Java implementation of an **in-memory B-Tree indexing engine** for efficient
 storage and retrieval of key-value datasets.
 
