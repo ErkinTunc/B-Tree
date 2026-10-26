@@ -6,6 +6,8 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Scanner;
 
+import java.nio.charset.StandardCharsets;
+
 import arbreb.ArbreB;
 
 /**
@@ -13,8 +15,7 @@ import arbreb.ArbreB;
  */
 public final class BTreeDemo {
 
-    private static final Path DATASET =
-            Path.of("data", "communes.txt");
+    private static final Path DATASET = Path.of("data", "communes.txt");
 
     private static final int DISPLAY_LIMIT = 10;
 
@@ -85,14 +86,12 @@ public final class BTreeDemo {
 
         int count = 0;
 
-        try (Scanner scanner = new Scanner(DATASET)) {
+        try (Scanner scanner = new Scanner(DATASET, StandardCharsets.UTF_8)) {
+
             while (scanner.hasNextLine()) {
                 String key = scanner.nextLine();
 
-                tree.ajouter(
-                        key,
-                        "record-" + count);
-
+                tree.ajouter(key, "record-" + count);
                 count++;
             }
         }
@@ -116,14 +115,12 @@ public final class BTreeDemo {
             ArbreB tree,
             String prefix) {
 
-        List<String> results =
-                tree.recherchePrefixe(prefix);
+        List<String> results = tree.recherchePrefixe(prefix);
 
         header(
                 "PREFIX SEARCH \"" + prefix + "\"");
 
-        int limit =
-                Math.min(DISPLAY_LIMIT, results.size());
+        int limit = Math.min(DISPLAY_LIMIT, results.size());
 
         for (int i = 0; i < limit; i++) {
             System.out.printf(
