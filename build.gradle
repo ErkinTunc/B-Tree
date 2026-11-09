@@ -19,3 +19,8 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+tasks.named('run', JavaExec) {
+    jvmArgs '-Dstdout.encoding=UTF-8',
+            '-Dstderr.encoding=UTF-8'
+}
