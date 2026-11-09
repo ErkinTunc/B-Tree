@@ -57,3 +57,21 @@ On Windows PowerShell, replace `./gradlew` with `.\gradlew.bat`.
 [Architecture](docs/architecture.md) · [Testing](docs/testing.md) · [Roadmap](docs/roadmap.md)
 
 **Stack:** `Java` · `Gradle` · `JUnit 5` · `Git` · `GitHub Actions (CI)`
+
+---
+
+## B+ Tree Structure (Planned)
+
+<p align="center">
+  <a href="docs/imgs/B%2BTree_Lookup_and%20_Range_Scan_Diagram-2.png">
+    <img
+      src="docs/imgs/B%2BTree_Lookup_and%20_Range_Scan_Diagram-2.png"
+      alt="B+ Tree structure showing point lookup and range scan"
+      width="420"
+    />
+  </a>
+</p>
+
+<p align="center">
+  <em>Conceptual illustration of B+ Tree structure, point lookup, and range scan.</em>
+</p>
